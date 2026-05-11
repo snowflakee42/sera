@@ -1,11 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <title>Akıllı Sera</title>
+    <meta charset="UTF-8">
+    <title>Sami Kibar | Hidroponik Panel</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; text-align: center; margin: 0; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 800px; margin: 40px auto; }
+        .card { background: #1e293b; padding: 30px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        .label { font-size: 0.9em; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; }
+        .value { font-size: 2.5em; font-weight: bold; color: #38bdf8; }
+        .btn { background: #ef4444; border: none; color: white; padding: 20px 50px; border-radius: 50px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); margin-top: 20px; }
+        .btn.active { background: #22c55e; box-shadow: 0 0 20px rgba(34, 197, 94, 0.4); }
+    </style>
 </head>
-
 <body>
-  <h1>Akıllı Sera Sistemi</h1>
-  <p>ESP32 bağlantısı hazırlanıyor...</p>
+    <h1>🌿 Hidroponik Kontrol Merkezi</h1>
+    <div class="grid">
+        <div class="card"><div class="label">Sıcaklık</div><div class="value" id="temp">--°C</div></div>
+        <div class="card"><div class="label">Nem</div><div class="value" id="hum">--%</div></div>
+    </div>
+    
+    <button id="pumpBtn" class="btn" onclick="togglePump()">Pompa Kapalı</button>
+
+    <script>
+        // DİKKAT: AŞAĞIDAKİ İKİ SATIRI KENDİ BİLGİLERİNLE DEĞİŞTİR!
+        const firebaseConfig = {
+            apiKey: "AIzaSyALpR1ATrKkhNZMeDCexRnHTgI56jc39b4",
+            databaseURL: "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        db.ref('sera').on('value', (snap) => {
+            const data = snap.val();
+            if(data) {
+                document.getElementById('temp').innerText = (data.sicaklik || "--") + "°C";
+                document.getElementById('hum').innerText = (data.nem || "--") + "%";
+                
+                const btn = document.getElementById('pumpBtn');
+                if(data.pompa == 1) {
+                    btn.classList.add('active');
+                    btn.innerText = "Pompa Çalışıyor";
+                } else {
+                    btn.classList.remove('active');
+                    btn.innerText = "Pompa Kapalı";
+                }
+            }
+        });
+
+        function togglePump() {
+            const btn = document.getElementById('pumpBtn');
+            const yeniDurum = btn.classList.contains('active') ? 0 : 1;
+            db.ref('sera').update({ pompa: yeniDurum });
+        }
+    </script>
 </body>
 </html>
