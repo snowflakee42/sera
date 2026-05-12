@@ -3,62 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sera projesi 2026 | Akıllı Sera Takip</title>
+    <title>hydropnic system | Akıllı Sera Takip</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         :root { --bg: #05070a; --glass: rgba(255, 255, 255, 0.05); --accent: #00d2ff; --danger: #ff4b2b; --success: #33d9b2; }
+        
         body { 
             font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; 
             margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
         }
-        .container { width: 90%; max-width: 450px; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 1.4rem; letter-spacing: 3px; margin: 0; color: var(--accent); text-shadow: 0 0 15px var(--accent); }
-        #lastSeen { font-size: 0.7rem; color: #aaa; margin-top: 5px; }
+
+        .container { width: 92%; max-width: 400px; padding: 15px; }
+
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 1.2rem; letter-spacing: 2px; margin: 0; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+        #lastSeen { font-size: 0.65rem; color: #aaa; margin-top: 5px; }
+
+        .data-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 
         .card { 
-            background: var(--glass); backdrop-filter: blur(15px); border-radius: 25px; 
-            border: 1px solid rgba(255,255,255,0.1); padding: 25px; margin-bottom: 15px; 
+            background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.1); padding: 15px; 
             text-align: center; transition: 0.5s;
         }
-        .data-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .label { font-size: 0.65rem; letter-spacing: 2px; color: #888; margin-bottom: 10px; }
-        .value { font-size: 2.5rem; font-weight: bold; transition: color 0.5s; }
+
+        .label { font-size: 0.6rem; letter-spacing: 1px; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+        .value { font-size: 1.8rem; font-weight: bold; transition: color 0.5s; }
 
         .pump-btn { 
-            width: 100%; padding: 20px; border-radius: 20px; border: none; font-size: 1rem; font-weight: bold;
-            color: white; cursor: pointer; transition: 0.5s; background: #222; margin-top: 10px;
+            width: 100%; padding: 18px; border-radius: 18px; border: none; font-size: 0.95rem; font-weight: bold;
+            color: white; cursor: pointer; transition: 0.5s; background: #222; margin-top: 5px;
         }
+
         .pump-btn.on { 
             background: linear-gradient(45deg, #00d2ff, #3a7bd5); 
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.5);
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.4);
         }
-        #msg { font-size: 0.85rem; font-weight: 600; margin-top: 15px; padding: 10px; border-radius: 10px; }
+
+        #msg { 
+            font-size: 0.75rem; font-weight: 600; margin-top: 12px; padding: 8px; 
+            border-radius: 10px; background: rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="header">
-            <h1>AKILLI SERA </h1>
+            <h1>AKILLI SERA SİSTEMİ</h1>
             <div id="lastSeen">Sistem aranıyor...</div>
         </div>
 
         <div class="data-row">
             <div class="card" id="tempBox">
-                <div class="label">SICAKLIK</div>
+                <div class="label">Sıcaklık</div>
                 <div class="value" id="temp">--°</div>
             </div>
             <div class="card" id="humBox">
-                <div class="label">NEM</div>
+                <div class="label">Nem</div>
                 <div class="value" id="hum">--%</div>
             </div>
         </div>
 
         <div class="card">
-            <div class="label">POMPA DURUMU</div>
+            <div class="label">Pompa Kontrolü</div>
             <button id="pumpBtn" class="pump-btn" onclick="togglePump()">BAĞLANIYOR...</button>
             <div id="msg">Veri bekleniyor...</div>
         </div>
@@ -70,51 +80,4 @@
             databaseURL: "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        db.ref('sera').on('value', (snap) => {
-            const data = snap.val();
-            if(!data) return;
-
-            const t = data.sicaklik;
-            const n = data.nem;
-            document.getElementById('temp').innerText = t + "°";
-            document.getElementById('hum').innerText = n + "%";
-            document.getElementById('lastSeen').innerText = "Son Veri: " + new Date().toLocaleTimeString();
-
-            const msgEl = document.getElementById('msg');
-            const tempBox = document.getElementById('tempBox');
-
-            // 25 DERECE ÜZERİ UYARI MANTIĞI
-            if(t > 25) {
-                msgEl.innerText = "⚠️ UYARI: SICAKLIK YÜKSEK (25°C+)";
-                msgEl.style.color = "var(--danger)";
-                document.getElementById('temp').style.color = "var(--danger)";
-                tempBox.style.borderColor = "var(--danger)";
-                tempBox.style.background = "rgba(255, 75, 43, 0.1)";
-            } else {
-                msgEl.innerText = "✓ SİSTEM DURUMU: NORMAL";
-                msgEl.style.color = "var(--success)";
-                document.getElementById('temp').style.color = "var(--accent)";
-                tempBox.style.borderColor = "rgba(255,255,255,0.1)";
-                tempBox.style.background = "var(--glass)";
-            }
-
-            const btn = document.getElementById('pumpBtn');
-            if(data.pompa == 1) {
-                btn.classList.add('on');
-                btn.innerText = "SULAMA AKTİF";
-            } else {
-                btn.classList.remove('on');
-                btn.innerText = "POMPA DURDURULDU";
-            }
-        });
-
-        function togglePump() {
-            const btn = document.getElementById('pumpBtn');
-            const durum = btn.classList.contains('on') ? 0 : 1;
-            db.ref('sera').update({ pompa: durum });
-        }
-    </script>
-</body>
-</html>
+        const db
