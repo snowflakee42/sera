@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AKILLI SERA | Smart Hydroponics OS</title>
+    <title>Sera projesi 2026 | Akıllı Sera Takip</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         :root { --bg: #05070a; --glass: rgba(255, 255, 255, 0.05); --accent: #00d2ff; --danger: #ff4b2b; --success: #33d9b2; }
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; 
+            font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; 
             margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
         }
@@ -20,20 +20,12 @@
 
         .card { 
             background: var(--glass); backdrop-filter: blur(15px); border-radius: 25px; 
-            border: 1px solid rgba(255,255,255,0.1); padding: 20px; margin-bottom: 15px; 
-            text-align: center; transition: 0.4s;
+            border: 1px solid rgba(255,255,255,0.1); padding: 25px; margin-bottom: 15px; 
+            text-align: center; transition: 0.5s;
         }
         .data-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .label { font-size: 0.6rem; letter-spacing: 2px; color: #888; margin-bottom: 5px; }
-        .value { font-size: 2.2rem; font-weight: bold; transition: color 0.5s; }
-
-        .mode-section { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; }
-        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(26px); }
+        .label { font-size: 0.65rem; letter-spacing: 2px; color: #888; margin-bottom: 10px; }
+        .value { font-size: 2.5rem; font-weight: bold; transition: color 0.5s; }
 
         .pump-btn { 
             width: 100%; padding: 20px; border-radius: 20px; border: none; font-size: 1rem; font-weight: bold;
@@ -42,18 +34,15 @@
         .pump-btn.on { 
             background: linear-gradient(45deg, #00d2ff, #3a7bd5); 
             box-shadow: 0 0 30px rgba(0, 210, 255, 0.5);
-            animation: pulse 2s infinite;
         }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.98); opacity: 0.8; } 100% { transform: scale(1); } }
-        
-        #msg { font-size: 0.8rem; font-weight: 500; margin-top: 10px; }
+        #msg { font-size: 0.85rem; font-weight: 600; margin-top: 15px; padding: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="header">
-            <h1>AKILLI SERA SİSTEMİ</h1>
+            <h1>AKILLI SERA v2.0</h1>
             <div id="lastSeen">Sistem aranıyor...</div>
         </div>
 
@@ -66,17 +55,6 @@
                 <div class="label">NEM</div>
                 <div class="value" id="hum">--%</div>
             </div>
-        </div>
-
-        <div class="card mode-section">
-            <div style="text-align: left;">
-                <div style="font-weight: bold; font-size: 0.9rem;">OTOMATİK MOD</div>
-                <div style="font-size: 0.6rem; color: #888;">AI Kontrolü Aktif</div>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="autoSwitch">
-                <span class="slider"></span>
-            </label>
         </div>
 
         <div class="card">
@@ -94,30 +72,34 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let autoMode = false;
-
-        // Ayarları Firebase'den al
         db.ref('sera').on('value', (snap) => {
             const data = snap.val();
             if(!data) return;
 
-            // Verileri Yazdır
             const t = data.sicaklik;
             const n = data.nem;
             document.getElementById('temp').innerText = t + "°";
             document.getElementById('hum').innerText = n + "%";
-            document.getElementById('lastSeen').innerText = "Son Güncelleme: " + new Date().toLocaleTimeString();
+            document.getElementById('lastSeen').innerText = "Son Veri: " + new Date().toLocaleTimeString();
 
-            // Görsel Uyarılar (Dinamik Renkler)
-            document.getElementById('temp').style.color = t > 30 ? "var(--danger)" : "var(--accent)";
-            document.getElementById('tempBox').style.borderColor = t > 30 ? "var(--danger)" : "rgba(255,255,255,0.1)";
-
-            // Mesajlar
             const msgEl = document.getElementById('msg');
-            if(t > 30) { msgEl.innerText = "⚠️ KRİTİK SICAKLIK!"; msgEl.style.color = "var(--danger)"; }
-            else { msgEl.innerText = "✓ SİSTEM STABİL"; msgEl.style.color = "var(--success)"; }
+            const tempBox = document.getElementById('tempBox');
 
-            // Pompa Butonu
+            // 25 DERECE ÜZERİ UYARI MANTIĞI
+            if(t > 25) {
+                msgEl.innerText = "⚠️ UYARI: SICAKLIK YÜKSEK (25°C+)";
+                msgEl.style.color = "var(--danger)";
+                document.getElementById('temp').style.color = "var(--danger)";
+                tempBox.style.borderColor = "var(--danger)";
+                tempBox.style.background = "rgba(255, 75, 43, 0.1)";
+            } else {
+                msgEl.innerText = "✓ SİSTEM DURUMU: NORMAL";
+                msgEl.style.color = "var(--success)";
+                document.getElementById('temp').style.color = "var(--accent)";
+                tempBox.style.borderColor = "rgba(255,255,255,0.1)";
+                tempBox.style.background = "var(--glass)";
+            }
+
             const btn = document.getElementById('pumpBtn');
             if(data.pompa == 1) {
                 btn.classList.add('on');
@@ -126,19 +108,9 @@
                 btn.classList.remove('on');
                 btn.innerText = "POMPA DURDURULDU";
             }
-
-            // OTOMATİK MOD MANTIĞI
-            if(document.getElementById('autoSwitch').checked) {
-                if(t > 30 && data.pompa == 0) { db.ref('sera').update({ pompa: 1 }); }
-                else if(t < 28 && data.pompa == 1) { db.ref('sera').update({ pompa: 0 }); }
-            }
         });
 
         function togglePump() {
-            if(document.getElementById('autoSwitch').checked) {
-                alert("Otomatik mod açıkken manuel müdahale edilemez!");
-                return;
-            }
             const btn = document.getElementById('pumpBtn');
             const durum = btn.classList.contains('on') ? 0 : 1;
             db.ref('sera').update({ pompa: durum });
