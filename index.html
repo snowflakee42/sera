@@ -3,53 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hidroponik Sera</title>
+<title>Sera Kontrol Paneli</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#0b1220;
-    color:white;
-    text-align:center;
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0b1220, #0f2a3d);
+    color: white;
+    text-align: center;
 }
 
-.card{
-    margin-top:80px;
-    padding:30px;
+/* KART */
+.card {
+    margin: 60px auto;
+    width: 90%;
+    max-width: 400px;
+    padding: 30px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
 }
 
-button{
-    padding:15px 30px;
-    border:none;
-    border-radius:10px;
-    margin:10px;
-    font-size:18px;
-    cursor:pointer;
+/* BAŞLIK */
+h2 {
+    margin-bottom: 10px;
 }
 
-.on{ background:green; color:white; }
-.off{ background:red; color:white; }
-
-#status{
-    font-size:22px;
-    margin:20px;
+/* STATUS */
+#status {
+    font-size: 22px;
+    margin: 20px 0;
+    padding: 10px;
+    border-radius: 10px;
+    transition: 0.3s;
 }
+
+/* BUTONLAR */
+button {
+    padding: 15px 25px;
+    margin: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+/* ON / OFF */
+.on {
+    background: #00c853;
+    color: white;
+}
+
+.off {
+    background: #d50000;
+    color: white;
+}
+
+/* ANİMASYONLU DURUM */
+.active {
+    background: rgba(0, 200, 83, 0.2);
+    box-shadow: 0 0 15px #00c853;
+}
+
+.inactive {
+    background: rgba(213, 0, 0, 0.2);
+    box-shadow: 0 0 15px #d50000;
+}
+
 </style>
 </head>
 
 <body>
 
 <div class="card">
-<h2>🌱 Hidroponik Sera Kontrol</h2>
 
-<div id="status">Durum bekleniyor...</div>
+    <h2>🌱 Hidroponik Sera Paneli</h2>
 
-<button class="on" onclick="setPump('ON')">AÇ</button>
-<button class="off" onclick="setPump('OFF')">KAPAT</button>
+    <div id="status" class="inactive">Durum: Bekleniyor...</div>
+
+    <button class="on" onclick="setPump('ON')">🚀 POMPAYI AÇ</button>
+    <button class="off" onclick="setPump('OFF')">⛔ POMPAYI KAPAT</button>
+
 </div>
 
 <script>
@@ -67,15 +112,22 @@ function setPump(state){
     db.ref("sera/command").set(state);
 }
 
-/* DURUM TAKİP */
+/* GERÇEK ZAMANLI DURUM */
 db.ref("sera/command").on("value", snap => {
     const val = snap.val();
+    const status = document.getElementById("status");
 
     if(val === "ON"){
-        document.getElementById("status").innerText = "🌊 POMPA AÇIK";
+        status.innerText = "🌊 Pompa Aktif";
+        status.className = "active";
     }
     else if(val === "OFF"){
-        document.getElementById("status").innerText = "⛔ POMPA KAPALI";
+        status.innerText = "⛔ Pompa Kapalı";
+        status.className = "inactive";
+    }
+    else{
+        status.innerText = "⏳ Sistem Bekliyor...";
+        status.className = "";
     }
 });
 
