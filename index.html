@@ -1,595 +1,254 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Akıllı Hidroponik Sera</title>
+<title>Akıllı Sera Sistemi</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
 body{
-
-    font-family:'Poppins',sans-serif;
-
-    background:
-    linear-gradient(
-    135deg,
-    #071018,
-    #0f172a,
-    #111827
-    );
-
-    min-height:100vh;
-
+    margin:0;
+    font-family:Poppins;
+    background:linear-gradient(135deg,#0f172a,#111827);
+    color:white;
     display:flex;
     justify-content:center;
     align-items:center;
-
-    overflow:hidden;
-
-    color:white;
+    min-height:100vh;
 }
-
-/* 🌌 ARKA IŞIKLAR */
-
-.bg1,.bg2{
-
-    position:absolute;
-
-    border-radius:50%;
-
-    filter:blur(130px);
-
-    opacity:.35;
-}
-
-.bg1{
-
-    width:380px;
-    height:380px;
-
-    background:#22c55e;
-
-    top:-120px;
-    left:-120px;
-}
-
-.bg2{
-
-    width:320px;
-    height:320px;
-
-    background:#0ea5e9;
-
-    bottom:-120px;
-    right:-120px;
-}
-
-/* 📦 ANA KART */
 
 .card{
-
-    position:relative;
-
     width:380px;
-
-    padding:32px;
-
-    border-radius:30px;
-
-    background:rgba(255,255,255,.08);
-
-    border:1px solid rgba(255,255,255,.12);
-
+    padding:25px;
+    border-radius:25px;
+    background:rgba(255,255,255,0.08);
     backdrop-filter:blur(18px);
-
-    box-shadow:
-    0 10px 45px rgba(0,0,0,.45);
-
-    z-index:10;
+    box-shadow:0 0 40px rgba(0,0,0,0.5);
 }
 
-/* 🌱 BAŞLIK */
-
-.title{
-
+h1{
     text-align:center;
-
-    margin-bottom:28px;
+    margin-bottom:20px;
 }
 
-.title h1{
-
-    font-size:30px;
-
-    font-weight:700;
-
-    margin-bottom:6px;
-}
-
-.title p{
-
-    opacity:.7;
-
-    font-size:14px;
-}
-
-/* 📊 VERİLER */
-
-.stats{
-
+.grid{
     display:grid;
-
     grid-template-columns:1fr 1fr;
-
-    gap:16px;
+    gap:15px;
 }
 
 .box{
-
-    background:rgba(255,255,255,.06);
-
-    border-radius:22px;
-
-    padding:20px;
-
+    background:rgba(255,255,255,0.07);
+    padding:15px;
+    border-radius:15px;
     text-align:center;
-
-    border:1px solid rgba(255,255,255,.08);
-
-    transition:.3s;
-}
-
-.box:hover{
-
-    transform:translateY(-4px);
-}
-
-.icon{
-
-    font-size:34px;
-
-    margin-bottom:10px;
 }
 
 .value{
-
-    font-size:30px;
-
-    font-weight:700;
+    font-size:28px;
+    font-weight:bold;
 }
 
-.label{
-
-    opacity:.7;
-
-    margin-top:4px;
-
-    font-size:13px;
-}
-
-/* 🚨 UYARI KUTUSU */
+/* ALERT */
 
 .alert{
-
-    margin-top:22px;
-
-    padding:18px;
-
-    border-radius:18px;
-
-    text-align:left;
-
-    line-height:1.8;
-
-    font-weight:600;
-
-    transition:.4s;
-
-    background:rgba(34,197,94,.15);
-
-    border:1px solid rgba(34,197,94,.35);
-
-    color:#86efac;
-
-    box-shadow:
-    0 0 20px rgba(34,197,94,.15);
+    margin-top:15px;
+    padding:12px;
+    border-radius:12px;
+    background:rgba(34,197,94,0.2);
+    border:1px solid #22c55e;
 }
-
-/* ⚠️ WARNING */
 
 .alert.warning{
-
-    background:rgba(234,179,8,.15);
-
-    border:1px solid rgba(234,179,8,.35);
-
-    color:#fde047;
-
-    box-shadow:
-    0 0 25px rgba(234,179,8,.25);
+    background:rgba(234,179,8,0.2);
+    border:1px solid #eab308;
 }
-
-/* 🚨 DANGER */
 
 .alert.danger{
-
-    background:rgba(239,68,68,.15);
-
-    border:1px solid rgba(239,68,68,.35);
-
-    color:#fca5a5;
-
-    box-shadow:
-    0 0 35px rgba(239,68,68,.35);
-
-    animation:pulse 1.2s infinite;
+    background:rgba(239,68,68,0.2);
+    border:1px solid #ef4444;
 }
 
-/* 💥 ANİMASYON */
-
-@keyframes pulse{
-
-    0%{
-
-        transform:scale(1);
-    }
-
-    50%{
-
-        transform:scale(1.02);
-    }
-
-    100%{
-
-        transform:scale(1);
-    }
-}
-
-/* 🚿 POMPA */
-
-.pump{
-
-    margin-top:24px;
-
-    background:rgba(255,255,255,.05);
-
-    border-radius:20px;
-
-    padding:22px;
-
-    text-align:center;
-}
-
-#pumpStatus{
-
-    margin-bottom:18px;
-
-    font-size:22px;
-
-    font-weight:700;
-}
-
-/* 🔘 BUTONLAR */
-
-.buttons{
-
-    display:flex;
-
-    gap:12px;
-}
+/* POMPA */
 
 button{
-
-    flex:1;
-
+    width:48%;
+    padding:12px;
     border:none;
-
-    padding:15px;
-
-    border-radius:14px;
-
+    border-radius:12px;
     cursor:pointer;
-
-    font-size:16px;
-
-    font-weight:600;
-
-    transition:.25s;
+    font-weight:bold;
 }
 
-.on{
+.on{background:#22c55e;color:white;}
+.off{background:#ef4444;color:white;}
 
-    background:#22c55e;
-
-    color:white;
+.buttons{
+    display:flex;
+    justify-content:space-between;
+    margin-top:15px;
 }
 
-.off{
+/* TOAST */
 
+.toast{
+    position:fixed;
+    top:20px;
+    right:20px;
     background:#ef4444;
-
-    color:white;
+    padding:12px 18px;
+    border-radius:10px;
+    opacity:0;
+    transition:0.3s;
 }
 
-button:hover{
-
-    transform:scale(1.04);
+.toast.show{
+    opacity:1;
 }
 
-/* 📱 MOBİL */
+/* ANIMATION */
 
-@media(max-width:450px){
+@keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.02);}
+    100%{transform:scale(1);}
+}
 
-    .card{
-
-        width:92%;
-    }
+.danger{
+    animation:pulse 1s infinite;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<div class="bg1"></div>
-<div class="bg2"></div>
-
 <div class="card">
-
-<div class="title">
 
 <h1>🌱 Akıllı Sera</h1>
 
-<p>Gerçek Zamanlı Ortam Takibi</p>
-
-</div>
-
-<!-- 📊 VERİLER -->
-
-<div class="stats">
+<div class="grid">
 
 <div class="box">
-
-<div class="icon">🌡️</div>
-
-<div class="value" id="temp">
---
-</div>
-
-<div class="label">
-Sıcaklık
-</div>
-
+🌡️
+<div class="value" id="temp">--</div>
 </div>
 
 <div class="box">
-
-<div class="icon">💧</div>
-
-<div class="value" id="hum">
---
-</div>
-
-<div class="label">
-Nem
+💧
+<div class="value" id="hum">--</div>
 </div>
 
 </div>
-
-</div>
-
-<!-- 🚨 UYARI -->
 
 <div id="alertBox" class="alert">
-
-✅ Tüm sistemler stabil çalışıyor.
-
-</div>
-
-<!-- 🚿 POMPA -->
-
-<div class="pump">
-
-<div id="pumpStatus">
-
-⏳ Bekleniyor
-
+✅ Sistem Normal
 </div>
 
 <div class="buttons">
+<button class="on" onclick="setPump('ON')">AÇ</button>
+<button class="off" onclick="setPump('OFF')">KAPAT</button>
+</div>
 
-<button class="on"
-onclick="setPump('ON')">
-
-POMPA AÇ
-
-</button>
-
-<button class="off"
-onclick="setPump('OFF')">
-
-KAPAT
-
-</button>
+<div style="text-align:center;margin-top:10px;" id="pumpStatus">⏳</div>
 
 </div>
 
-</div>
+<!-- TOAST + SOUND -->
+<div id="toast" class="toast"></div>
 
-</div>
+<audio id="sound">
+<source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
+</audio>
 
 <script>
 
-/* 🔥 FIREBASE */
-
+/* FIREBASE */
 const firebaseConfig = {
-
     apiKey:"AIzaSyALpR1ATrKkhNZMeDCexRnHTgI56jc39b4",
-
-    databaseURL:
-    "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
+    databaseURL:"https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.database();
 
-/* 🚿 POMPA */
-
-function setPump(state){
-
-    db.ref("sera/command").set(state);
+/* NOTIFICATION */
+if(Notification.permission !== "granted"){
+    Notification.requestPermission();
 }
 
-/* 🚨 UYARI SİSTEMİ */
+function notify(msg){
 
-let currentTemp = null;
-let currentHum = null;
+    document.getElementById("toast").innerText = msg;
+    document.getElementById("toast").classList.add("show");
 
-function checkAlerts(){
+    setTimeout(()=>{
+        document.getElementById("toast").classList.remove("show");
+    },2500);
 
-    const box =
-    document.getElementById("alertBox");
+    document.getElementById("sound").play();
 
-    let alerts = [];
-
-    let danger = false;
-
-    // 🔥 SICAKLIK YÜKSEK
-    if(currentTemp >= 25){
-
-        alerts.push(
-        "🔥 Sıcaklık kritik seviyede!"
-        );
-
-        danger = true;
+    if(Notification.permission === "granted"){
+        new Notification("Sera Uyarı", {body:msg});
     }
+}
 
-    // ❄️ SICAKLIK DÜŞÜK
-    if(currentTemp <= 15){
+/* POMPA */
+function setPump(s){
+    db.ref("sera/command").set(s);
+}
 
-        alerts.push(
-        "❄️ Sıcaklık çok düşük!"
-        );
-    }
+/* DATA */
+let t=null, h=null;
 
-    // 💧 NEM DÜŞÜK
-    if(currentHum <= 35){
+function check(){
 
-        alerts.push(
-        "💧 Nem çok düşük!"
-        );
-    }
+    let a=[];
+    let d=false;
 
-    // 🌫️ NEM YÜKSEK
-    if(currentHum >= 80){
+    if(t>=25){a.push("🔥 Sıcaklık yüksek");d=true;notify("🔥 Sıcaklık yüksek");}
+    if(t<=15){a.push("❄️ Sıcaklık düşük");notify("❄️ Sıcaklık düşük");}
+    if(h<=35){a.push("💧 Nem düşük");notify("💧 Nem düşük");}
+    if(h>=80){a.push("🌫️ Nem yüksek");d=true;notify("🌫️ Nem yüksek");}
 
-        alerts.push(
-        "🌫️ Nem aşırı yükseldi!"
-        );
+    let box=document.getElementById("alertBox");
 
-        danger = true;
-    }
-
-    // ✅ NORMAL
-    if(alerts.length === 0){
-
-        box.className = "alert";
-
-        box.innerHTML =
-        "✅ Tüm sistemler stabil çalışıyor.";
-
+    if(a.length==0){
+        box.className="alert";
+        box.innerHTML="✅ Sistem Normal";
         return;
     }
 
-    // 🚨 DANGER
-    if(danger){
-
-        box.className =
-        "alert danger";
-    }
-
-    // ⚠️ WARNING
-    else{
-
-        box.className =
-        "alert warning";
-    }
-
-    // 🔥 ÇOKLU UYARI
-    box.innerHTML =
-    alerts.join("<br>");
+    box.className=d?"alert danger":"alert warning";
+    box.innerHTML=a.join("<br>");
 }
 
-/* 🌡️ SICAKLIK */
-
-db.ref("sera/temperature").on("value",snap=>{
-
-    currentTemp = Number(snap.val());
-
-    document.getElementById("temp").innerHTML =
-    currentTemp + "°";
-
-    checkAlerts();
+/* TEMP */
+db.ref("sera/temperature").on("value",s=>{
+    t=Number(s.val());
+    document.getElementById("temp").innerText=t+"°";
+    check();
 });
 
-/* 💧 NEM */
-
-db.ref("sera/humidity").on("value",snap=>{
-
-    currentHum = Number(snap.val());
-
-    document.getElementById("hum").innerHTML =
-    currentHum + "%";
-
-    checkAlerts();
+/* HUM */
+db.ref("sera/humidity").on("value",s=>{
+    h=Number(s.val());
+    document.getElementById("hum").innerText=h+"%";
+    check();
 });
 
-/* 🚿 POMPA DURUM */
-
-db.ref("sera/command").on("value",snap=>{
-
-    const val = snap.val();
-
-    const status =
-    document.getElementById("pumpStatus");
-
-    if(val==="ON"){
-
-        status.innerHTML =
-        "🌊 Pompa Aktif";
-    }
-
-    else if(val==="OFF"){
-
-        status.innerHTML =
-        "⛔ Pompa Kapalı";
-    }
-
-    else{
-
-        status.innerHTML =
-        "⏳ Bekleniyor";
-    }
+/* PUMP */
+db.ref("sera/command").on("value",s=>{
+    document.getElementById("pumpStatus").innerText=
+    s.val()==="ON"?"🌊 AÇIK":"⛔ KAPALI";
 });
 
 </script>
