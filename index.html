@@ -27,8 +27,6 @@
 </button>
 
 <script>
-
-/* 🔥 FIREBASE AYAR */
 const firebaseConfig = {
     apiKey: "XXX",
     databaseURL: "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
@@ -37,23 +35,21 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* 🔥 POMPAYI KONTROL */
-function setPump(val){
-   db.ref("sera/pompa").set(val);
+/* 🔥 AÇ */
+function openPump(){
+    db.ref("sera/command").set("ON");
 }
 
-/* 🔥 CANLI TAKİP */
-db.ref("sera/pompa").on("value", snap => {
-    const val = snap.val();
+/* 🔥 KAPAT */
+function closePump(){
+    db.ref("sera/command").set("OFF");
+}
 
-    if(val == 1){
-        document.getElementById("status").innerText = "🌊 POMPA AÇIK";
-    } else {
-        document.getElementById("status").innerText = "⛔ POMPA KAPALI";
-    }
-});
-
+/* 🔥 DURUM SIFIRLA (çok önemli) */
+function resetCommand(){
+    db.ref("sera/command").set("none");
+}
 </script>
 
-</body>
-</html>
+<button onclick="openPump()">AÇ</button>
+<button onclick="closePump()">KAPAT</button>
