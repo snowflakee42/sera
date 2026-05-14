@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hidroponik Sera Kontrol</title>
+<title>Hidroponik Sera</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -44,19 +44,16 @@ button{
 <body>
 
 <div class="card">
-
-<h2>🌱 Hidroponik Sera</h2>
+<h2>🌱 Hidroponik Sera Kontrol</h2>
 
 <div id="status">Durum bekleniyor...</div>
 
 <button class="on" onclick="setPump('ON')">AÇ</button>
 <button class="off" onclick="setPump('OFF')">KAPAT</button>
-
 </div>
 
 <script>
 
-/* 🔥 FIREBASE */
 const firebaseConfig = {
     apiKey: "XXX",
     databaseURL: "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
@@ -65,12 +62,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* 🔥 KOMUT GÖNDER */
+/* KOMUT GÖNDER */
 function setPump(state){
     db.ref("sera/command").set(state);
 }
 
-/* 🔥 DURUM TAKİP */
+/* DURUM TAKİP */
 db.ref("sera/command").on("value", snap => {
     const val = snap.val();
 
@@ -79,9 +76,6 @@ db.ref("sera/command").on("value", snap => {
     }
     else if(val === "OFF"){
         document.getElementById("status").innerText = "⛔ POMPA KAPALI";
-    }
-    else{
-        document.getElementById("status").innerText = "⏳ Bekleniyor...";
     }
 });
 
