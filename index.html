@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hidroponik Sera</title>
+    <title>Sera Kontrol</title>
 
-    <!-- 🔥 FIREBASE (DOĞRU VERSİYON - COMPAT) -->
+    <!-- 🔥 FIREBASE CORE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <style>
-        body { font-family: Arial; background:#0b1220; color:white; text-align:center; }
-        button { padding:10px 20px; margin:10px; }
-        .on { background:green; color:white; }
-        .off { background:red; color:white; }
-    </style>
 </head>
 
-<body>
+<body style="background:#0b1220; color:white; text-align:center;">
 
-<h2>🌱 Sera Kontrol Paneli</h2>
+<h2>🌱 Hidroponik Sera Kontrol</h2>
 
-<p id="status">Durum: Yükleniyor...</p>
+<div id="status">Durum bekleniyor...</div>
 
-<button class="on" onclick="setPump(1)">AÇ</button>
-<button class="off" onclick="setPump(0)">KAPAT</button>
+<br>
+
+<button onclick="setPump(1)" style="padding:10px 20px; background:green; color:white;">
+    AÇ
+</button>
+
+<button onclick="setPump(0)" style="padding:10px 20px; background:red; color:white;">
+    KAPAT
+</button>
 
 <script>
+
 /* 🔥 FIREBASE AYAR */
 const firebaseConfig = {
     apiKey: "XXX",
@@ -39,9 +39,7 @@ const db = firebase.database();
 
 /* 🔥 POMPAYI KONTROL */
 function setPump(val){
-    db.ref("sera").update({
-        pompa: val
-    });
+   db.ref("sera/pompa").set(val);
 }
 
 /* 🔥 CANLI TAKİP */
@@ -54,6 +52,7 @@ db.ref("sera/pompa").on("value", snap => {
         document.getElementById("status").innerText = "⛔ POMPA KAPALI";
     }
 });
+
 </script>
 
 </body>
