@@ -141,10 +141,38 @@ button{
 
 </div>
 
-<!-- 🔊 AUDIO -->
 <audio id="sound" preload="auto">
-<source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
+<source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
 </audio>
+
+<script>
+
+let audioUnlocked = false;
+
+/* 1 KEZ KULLANICI AÇAR */
+document.addEventListener("click", () => {
+    const a = document.getElementById("sound");
+
+    a.play().then(() => {
+        a.pause();
+        a.currentTime = 0;
+        audioUnlocked = true;
+        console.log("🔊 SOUND UNLOCKED");
+    }).catch(()=>{});
+});
+
+/* SES ÇAL */
+function playAlarm(){
+
+    if(!audioUnlocked) return;
+
+    const audio = document.getElementById("sound");
+
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+}
+
+</script>
 
 <script>
 
