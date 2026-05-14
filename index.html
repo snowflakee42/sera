@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 
@@ -13,7 +14,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 
@@ -30,9 +31,9 @@ body{
     background:
     linear-gradient(
     135deg,
+    #071018,
     #0f172a,
-    #111827,
-    #07111f
+    #111827
     );
 
     min-height:100vh;
@@ -41,12 +42,12 @@ body{
     justify-content:center;
     align-items:center;
 
-    color:white;
-
     overflow:hidden;
+
+    color:white;
 }
 
-/* 🌌 ARKA PLAN */
+/* 🌌 ARKA IŞIKLAR */
 
 .bg1,.bg2{
 
@@ -54,31 +55,31 @@ body{
 
     border-radius:50%;
 
-    filter:blur(120px);
+    filter:blur(130px);
 
     opacity:.35;
 }
 
 .bg1{
 
-    width:350px;
-    height:350px;
+    width:380px;
+    height:380px;
 
     background:#22c55e;
 
-    top:-100px;
-    left:-100px;
+    top:-120px;
+    left:-120px;
 }
 
 .bg2{
 
-    width:300px;
-    height:300px;
+    width:320px;
+    height:320px;
 
     background:#0ea5e9;
 
     bottom:-120px;
-    right:-100px;
+    right:-120px;
 }
 
 /* 📦 ANA KART */
@@ -87,20 +88,20 @@ body{
 
     position:relative;
 
-    width:360px;
+    width:380px;
 
-    padding:30px;
+    padding:32px;
 
-    border-radius:28px;
+    border-radius:30px;
 
     background:rgba(255,255,255,.08);
 
-    border:1px solid rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.12);
 
     backdrop-filter:blur(18px);
 
     box-shadow:
-    0 10px 40px rgba(0,0,0,.45);
+    0 10px 45px rgba(0,0,0,.45);
 
     z-index:10;
 }
@@ -111,26 +112,26 @@ body{
 
     text-align:center;
 
-    margin-bottom:25px;
+    margin-bottom:28px;
 }
 
 .title h1{
 
-    font-size:28px;
+    font-size:30px;
 
-    font-weight:600;
+    font-weight:700;
+
+    margin-bottom:6px;
 }
 
 .title p{
 
     opacity:.7;
 
-    margin-top:6px;
-
     font-size:14px;
 }
 
-/* 📊 VERİ KARTLARI */
+/* 📊 VERİLER */
 
 .stats{
 
@@ -138,18 +139,16 @@ body{
 
     grid-template-columns:1fr 1fr;
 
-    gap:15px;
-
-    margin-top:20px;
+    gap:16px;
 }
 
 .box{
 
-    background:rgba(255,255,255,.07);
+    background:rgba(255,255,255,.06);
 
-    border-radius:20px;
+    border-radius:22px;
 
-    padding:18px;
+    padding:20px;
 
     text-align:center;
 
@@ -163,21 +162,21 @@ body{
     transform:translateY(-4px);
 }
 
-.box .icon{
+.icon{
+
+    font-size:34px;
+
+    margin-bottom:10px;
+}
+
+.value{
 
     font-size:30px;
 
-    margin-bottom:8px;
+    font-weight:700;
 }
 
-.box .value{
-
-    font-size:28px;
-
-    font-weight:600;
-}
-
-.box .label{
+.label{
 
     opacity:.7;
 
@@ -190,23 +189,28 @@ body{
 
 .alert{
 
-    margin-top:20px;
+    margin-top:22px;
 
-    padding:14px;
+    padding:18px;
 
-    border-radius:16px;
+    border-radius:18px;
+
+    text-align:left;
+
+    line-height:1.8;
 
     font-weight:600;
 
-    text-align:center;
-
     transition:.4s;
 
-    background:rgba(34,197,94,.18);
+    background:rgba(34,197,94,.15);
 
     border:1px solid rgba(34,197,94,.35);
 
     color:#86efac;
+
+    box-shadow:
+    0 0 20px rgba(34,197,94,.15);
 }
 
 /* ⚠️ WARNING */
@@ -218,6 +222,9 @@ body{
     border:1px solid rgba(234,179,8,.35);
 
     color:#fde047;
+
+    box-shadow:
+    0 0 25px rgba(234,179,8,.25);
 }
 
 /* 🚨 DANGER */
@@ -229,19 +236,44 @@ body{
     border:1px solid rgba(239,68,68,.35);
 
     color:#fca5a5;
+
+    box-shadow:
+    0 0 35px rgba(239,68,68,.35);
+
+    animation:pulse 1.2s infinite;
+}
+
+/* 💥 ANİMASYON */
+
+@keyframes pulse{
+
+    0%{
+
+        transform:scale(1);
+    }
+
+    50%{
+
+        transform:scale(1.02);
+    }
+
+    100%{
+
+        transform:scale(1);
+    }
 }
 
 /* 🚿 POMPA */
 
 .pump{
 
-    margin-top:25px;
+    margin-top:24px;
 
-    background:rgba(255,255,255,.06);
+    background:rgba(255,255,255,.05);
 
-    border-radius:18px;
+    border-radius:20px;
 
-    padding:20px;
+    padding:22px;
 
     text-align:center;
 }
@@ -252,7 +284,7 @@ body{
 
     font-size:22px;
 
-    font-weight:600;
+    font-weight:700;
 }
 
 /* 🔘 BUTONLAR */
@@ -270,7 +302,7 @@ button{
 
     border:none;
 
-    padding:14px;
+    padding:15px;
 
     border-radius:14px;
 
@@ -299,7 +331,7 @@ button{
 
 button:hover{
 
-    transform:scale(1.03);
+    transform:scale(1.04);
 }
 
 /* 📱 MOBİL */
@@ -327,9 +359,11 @@ button:hover{
 
 <h1>🌱 Akıllı Sera</h1>
 
-<p>Canlı Ortam İzleme Sistemi</p>
+<p>Gerçek Zamanlı Ortam Takibi</p>
 
 </div>
+
+<!-- 📊 VERİLER -->
 
 <div class="stats">
 
@@ -367,7 +401,7 @@ Nem
 
 <div id="alertBox" class="alert">
 
-✅ Sistem Normal
+✅ Tüm sistemler stabil çalışıyor.
 
 </div>
 
@@ -426,7 +460,7 @@ function setPump(state){
     db.ref("sera/command").set(state);
 }
 
-/* 🚨 ALARM */
+/* 🚨 UYARI SİSTEMİ */
 
 let currentTemp = null;
 let currentHum = null;
@@ -436,50 +470,74 @@ function checkAlerts(){
     const box =
     document.getElementById("alertBox");
 
+    let alerts = [];
+
+    let danger = false;
+
     // 🔥 SICAKLIK YÜKSEK
     if(currentTemp >= 25){
 
-        box.className = "alert danger";
+        alerts.push(
+        "🔥 Sıcaklık kritik seviyede!"
+        );
 
-        box.innerHTML =
-        "🔥 Sıcaklık çok yüksek!";
+        danger = true;
     }
 
     // ❄️ SICAKLIK DÜŞÜK
-    else if(currentTemp <= 15){
+    if(currentTemp <= 15){
 
-        box.className = "alert warning";
-
-        box.innerHTML =
-        "❄️ Sıcaklık düşük!";
+        alerts.push(
+        "❄️ Sıcaklık çok düşük!"
+        );
     }
 
     // 💧 NEM DÜŞÜK
-    else if(currentHum <= 35){
+    if(currentHum <= 35){
 
-        box.className = "alert warning";
-
-        box.innerHTML =
-        "💧 Nem çok düşük!";
+        alerts.push(
+        "💧 Nem çok düşük!"
+        );
     }
 
     // 🌫️ NEM YÜKSEK
-    else if(currentHum >= 80){
+    if(currentHum >= 80){
 
-        box.className = "alert danger";
+        alerts.push(
+        "🌫️ Nem aşırı yükseldi!"
+        );
 
-        box.innerHTML =
-        "🌫️ Nem çok yüksek!";
+        danger = true;
     }
 
     // ✅ NORMAL
-    else{
+    if(alerts.length === 0){
 
         box.className = "alert";
 
         box.innerHTML =
-        "✅ Sistem Normal";
+        "✅ Tüm sistemler stabil çalışıyor.";
+
+        return;
     }
+
+    // 🚨 DANGER
+    if(danger){
+
+        box.className =
+        "alert danger";
+    }
+
+    // ⚠️ WARNING
+    else{
+
+        box.className =
+        "alert warning";
+    }
+
+    // 🔥 ÇOKLU UYARI
+    box.innerHTML =
+    alerts.join("<br>");
 }
 
 /* 🌡️ SICAKLIK */
