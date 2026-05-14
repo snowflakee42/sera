@@ -5,23 +5,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Hidroponik Akıllı Sera</title>
+<title>Akıllı Sera Login System</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
 
-/* 🌱 HİDROPONİK ARKA PLAN */
 body{
     margin:0;
     font-family:Poppins;
 
     background:
     linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
-    url("https://images.unsplash.com/photo-1585320806297-9794b3e4eeae")
+    url("https://cdn.prod.website-files.com/680a070c3b99253410dd3df5/684d84f335cd45ba1f374612_68484d93e48a9df6b4587d3a_hydroponic-farming_Fig%201.webp")
     no-repeat center center fixed;
 
     background-size:cover;
@@ -33,102 +33,52 @@ body{
     color:white;
 }
 
-/* PANEL */
-.card{
-    width:420px;
+/* BOX */
+.box{
+    width:360px;
     padding:25px;
-    border-radius:25px;
+    border-radius:20px;
     background:rgba(0,0,0,0.65);
     backdrop-filter:blur(10px);
-    box-shadow:0 0 40px rgba(0,0,0,0.7);
-}
-
-/* GRID */
-.grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
-}
-
-.box{
-    background:rgba(255,255,255,0.08);
-    padding:15px;
-    border-radius:15px;
     text-align:center;
 }
 
-.value{
-    font-size:30px;
-    font-weight:bold;
-}
-
-/* ALERT */
-.alert{
-    margin-top:15px;
-    padding:15px;
-    border-radius:12px;
-    text-align:center;
-    font-weight:700;
-    background:rgba(34,197,94,0.2);
-    border:2px solid #22c55e;
-}
-
-.alert.warning{
-    border-color:#eab308;
-}
-
-.alert.danger{
-    border-color:#ef4444;
-    animation:shake 0.5s infinite;
-}
-
-@keyframes shake{
-    0%{transform:translateX(0);}
-    25%{transform:translateX(-3px);}
-    50%{transform:translateX(3px);}
-    75%{transform:translateX(-3px);}
-    100%{transform:translateX(0);}
-}
-
-/* BUTTONS */
-button{
-    width:48%;
-    padding:12px;
+/* INPUT */
+input{
+    width:90%;
+    padding:10px;
+    margin:6px;
     border:none;
-    border-radius:10px;
+    border-radius:8px;
+}
+
+/* BUTTON */
+button{
+    width:95%;
+    padding:10px;
+    margin-top:8px;
+    border:none;
+    border-radius:8px;
     font-weight:bold;
     cursor:pointer;
 }
 
-.on{background:#22c55e;color:white;}
-.off{background:#ef4444;color:white;}
+.green{background:#22c55e;color:white;}
+.red{background:#ef4444;color:white;}
 
-.buttons{
-    display:flex;
-    justify-content:space-between;
-    margin-top:15px;
+/* DASHBOARD */
+.hidden{display:none;}
+
+.alert{
+    margin-top:10px;
+    padding:10px;
+    border-radius:10px;
+    background:rgba(34,197,94,0.2);
+    border:1px solid #22c55e;
 }
 
-/* 🔴 FLASH */
-.flash{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:red;
-    opacity:0;
-    pointer-events:none;
-}
-
-.flash.active{
-    animation:flashAnim 0.3s 2;
-}
-
-@keyframes flashAnim{
-    0%{opacity:0;}
-    50%{opacity:0.8;}
-    100%{opacity:0;}
+.alert.danger{
+    border-color:#ef4444;
 }
 
 </style>
@@ -136,41 +86,47 @@ button{
 
 <body>
 
-<div class="flash" id="flash"></div>
+<!-- LOGIN -->
+<div id="loginBox" class="box">
 
-<div class="card">
+<h2>🌱 Giriş</h2>
 
-<h2 style="text-align:center;">🌱 Hidroponik Sera</h2>
+<input id="loginEmail" placeholder="Email">
+<input id="loginPass" type="password" placeholder="Şifre">
 
-<div class="grid">
+<button class="green" onclick="login()">Giriş Yap</button>
 
-<div class="box">
-🌡️
-<div class="value" id="temp">--</div>
-</div>
+<hr>
 
-<div class="box">
-💧
-<div class="value" id="hum">--</div>
-</div>
+<h3>Kayıt Ol</h3>
 
-</div>
+<input id="regEmail" placeholder="Email">
+<input id="regPass" type="password" placeholder="Şifre">
+<input id="regPass2" type="password" placeholder="Şifre Tekrar">
 
-<div id="alertBox" class="alert">
-✅ Sistem Normal
-</div>
-
-<div class="buttons">
-<button class="on" onclick="setPump('ON')">AÇ</button>
-<button class="off" onclick="setPump('OFF')">KAPAT</button>
-</div>
-
-<div id="pumpStatus" style="text-align:center;margin-top:10px;">⏳</div>
+<button class="red" onclick="register()">Kayıt Ol</button>
 
 </div>
 
-<!-- 🔊 SES -->
-<audio id="sound" preload="auto">
+<!-- DASHBOARD -->
+<div id="dash" class="box hidden">
+
+<h2>🌱 Sera Panel</h2>
+
+<div>🌡️ <span id="temp">--</span></div>
+<div>💧 <span id="hum">--</span></div>
+
+<div id="alertBox" class="alert">Sistem Normal</div>
+
+<button class="green" onclick="setPump('ON')">POMPA AÇ</button>
+<button class="red" onclick="setPump('OFF')">POMPA KAPAT</button>
+
+<button onclick="logout()">Çıkış</button>
+
+</div>
+
+<!-- SOUND -->
+<audio id="sound">
 <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
 </audio>
 
@@ -179,131 +135,86 @@ button{
 /* FIREBASE */
 const firebaseConfig = {
     apiKey:"AIzaSyALpR1ATrKkhNZMeDCexRnHTgI56jc39b4",
+    authDomain:"sera-61afd.firebaseapp.com",
     databaseURL:"https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
 firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
 const db = firebase.database();
 
-/* STATE */
-let t = 0;
-let h = 0;
-let lastAlert = "";
-let audioReady = false;
+/* REGISTER */
+function register(){
 
-/* 🔊 AUDIO UNLOCK (KESİN FIX) */
-function unlockAudio(){
+    let email = regEmail.value;
+    let pass = regPass.value;
+    let pass2 = regPass2.value;
 
-    const audio = document.getElementById("sound");
+    if(pass !== pass2){
+        alert("Şifreler aynı değil!");
+        return;
+    }
 
-    audio.play().then(()=>{
-        audio.pause();
-        audio.currentTime = 0;
-        audioReady = true;
-        console.log("AUDIO READY");
-    }).catch(()=>{});
+    auth.createUserWithEmailAndPassword(email,pass)
+    .then(()=>{
+        alert("Kayıt başarılı");
+    })
+    .catch(e=>alert(e.message));
 }
 
-document.addEventListener("click", unlockAudio);
-document.addEventListener("touchstart", unlockAudio);
+/* LOGIN */
+function login(){
+
+    auth.signInWithEmailAndPassword(loginEmail.value,loginPass.value)
+    .then(()=>{
+        loginBox.classList.add("hidden");
+        dash.classList.remove("hidden");
+    })
+    .catch(e=>alert(e.message));
+}
+
+/* LOGOUT */
+function logout(){
+    auth.signOut();
+    location.reload();
+}
+
+/* AUTH STATE */
+auth.onAuthStateChanged(user=>{
+    if(user){
+        loginBox.classList.add("hidden");
+        dash.classList.remove("hidden");
+    }
+});
 
 /* PUMP */
 function setPump(s){
     db.ref("sera/command").set(s);
 }
 
-/* 🔊 SOUND */
-function playSound(){
+/* ALERT LOGIC */
+function check(t,h){
 
-    if(!audioReady) return;
-
-    const audio = document.getElementById("sound");
-
-    audio.currentTime = 0;
-    audio.play();
+    if(t>=30 && h>=85){
+        document.getElementById("alertBox").innerText = "🔥 KRİTİK!";
+        document.getElementById("alertBox").classList.add("danger");
+    }else{
+        document.getElementById("alertBox").innerText = "Sistem Normal";
+        document.getElementById("alertBox").classList.remove("danger");
+    }
 }
 
-/* 🔴 FLASH */
-function flash(){
-
-    const f = document.getElementById("flash");
-
-    f.classList.remove("active");
-    void f.offsetWidth;
-    f.classList.add("active");
-}
-
-/* ALERT */
-function check(){
-
-    let alerts = [];
-    let danger = false;
-
-    if(t >= 25){
-        alerts.push("🔥 Sıcaklık yüksek!");
-        danger = true;
-    }
-
-    if(h <= 35){
-        alerts.push("💧 Nem düşük!");
-    }
-
-    if(h >= 80){
-        alerts.push("🌫️ Nem yüksek!");
-        danger = true;
-    }
-
-    /* KRİTİK */
-    if(t >= 30 && h >= 85){
-
-        flash();
-        playSound();
-        setTimeout(playSound, 300);
-
-        if(navigator.vibrate){
-            navigator.vibrate([300,100,300,100,600]);
-        }
-    }
-
-    let text = alerts.join(" | ");
-
-    if(text !== "" && text !== lastAlert){
-
-        lastAlert = text;
-
-        playSound();
-    }
-
-    let box = document.getElementById("alertBox");
-
-    if(alerts.length === 0){
-
-        box.className = "alert";
-        box.innerHTML = "✅ Sistem Normal";
-        return;
-    }
-
-    box.className = danger ? "alert danger" : "alert warning";
-    box.innerHTML = alerts.join("<br>");
-}
-
-/* DATA */
+/* SENSOR */
 db.ref("sera/temperature").on("value",snap=>{
-    t = Number(snap.val());
-    document.getElementById("temp").innerText = t + "°";
-    check();
+    let t = snap.val();
+    temp.innerText = t + "°";
 });
 
 db.ref("sera/humidity").on("value",snap=>{
-    h = Number(snap.val());
-    document.getElementById("hum").innerText = h + "%";
-    check();
-});
-
-/* PUMP */
-db.ref("sera/command").on("value",snap=>{
-    document.getElementById("pumpStatus").innerText =
-    snap.val() === "ON" ? "🌊 AÇIK" : "⛔ KAPALI";
+    let h = snap.val();
+    hum.innerText = h + "%";
+    check(Number(temp.innerText), Number(h));
 });
 
 </script>
