@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sera Alarm Sistem</title>
+<title>Akıllı Sera Alarm Sistemi</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -17,7 +17,6 @@ body{
     margin:0;
     font-family:Arial;
 
-    /* 🌱 YENİ ARKA PLAN (KESİN ÇALIŞIR) */
     background:
     linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
     url("https://images.unsplash.com/photo-1461354464878-ad92f492a5a0")
@@ -61,6 +60,7 @@ button{
 
 .hidden{display:none;}
 
+/* ALERT */
 .alert{
     margin-top:10px;
     padding:10px;
@@ -126,13 +126,18 @@ button{
 
 </div>
 
-<!-- DASH -->
+<!-- DASHBOARD -->
 <div id="dash" class="box hidden">
 
 <h2>🌱 Sera Panel</h2>
 
 <div>🌡️ <span id="temp">--</span></div>
 <div>💧 <span id="hum">--</span></div>
+
+<!-- 🔊 SES AÇMA BUTONU -->
+<div id="soundBox" class="alert" onclick="enableSound()">
+🔊 Ses sistemi için TIKLA (1 kere)
+</div>
 
 <div id="alertBox" class="alert">Sistem Normal</div>
 
@@ -141,38 +146,10 @@ button{
 
 </div>
 
-<audio id="sound" preload="auto">
+<!-- 🔊 SOUND -->
+<audio id="sound">
 <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
 </audio>
-
-<script>
-
-let audioUnlocked = false;
-
-/* 1 KEZ KULLANICI AÇAR */
-document.addEventListener("click", () => {
-    const a = document.getElementById("sound");
-
-    a.play().then(() => {
-        a.pause();
-        a.currentTime = 0;
-        audioUnlocked = true;
-        console.log("🔊 SOUND UNLOCKED");
-    }).catch(()=>{});
-});
-
-/* SES ÇAL */
-function playAlarm(){
-
-    if(!audioUnlocked) return;
-
-    const audio = document.getElementById("sound");
-
-    audio.currentTime = 0;
-    audio.play().catch(()=>{});
-}
-
-</script>
 
 <script>
 
@@ -189,26 +166,28 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 /* STATE */
-let t=0;
-let h=0;
-let unlocked = false;
+let t = 0;
+let h = 0;
+let soundEnabled = false;
 
-/* 🔊 KESİN SES UNLOCK (EN GÜÇLÜ YÖNTEM) */
-function unlockSound(){
+/* 🔊 SES AÇMA */
+function enableSound(){
 
     const audio = document.getElementById("sound");
 
     audio.play().then(()=>{
         audio.pause();
         audio.currentTime = 0;
-        unlocked = true;
-        console.log("SOUND READY");
-    }).catch(()=>{});
-}
 
-/* hem click hem touch */
-document.addEventListener("click", unlockSound);
-document.addEventListener("touchstart", unlockSound);
+        soundEnabled = true;
+
+        document.getElementById("soundBox").innerText =
+        "🔊 Ses Aktif (Alarm çalışır)";
+
+    }).catch(()=>{
+        alert("Tarayıcı ses izni vermedi, tekrar tıkla");
+    });
+}
 
 /* LOGIN */
 function login(){
@@ -222,7 +201,7 @@ function login(){
 /* REGISTER */
 function register(){
     auth.createUserWithEmailAndPassword(email.value,pass.value)
-    .then(()=>alert("OK"));
+    .then(()=>alert("Kayıt OK"));
 }
 
 /* PUMP */
@@ -230,10 +209,10 @@ function setPump(v){
     db.ref("sera/command").set(v);
 }
 
-/* 🔊 SOUND PLAY */
-function beep(){
+/* 🔊 ALARM SES */
+function playAlarm(){
 
-    if(!unlocked) return;
+    if(!soundEnabled) return;
 
     const audio = document.getElementById("sound");
 
@@ -251,43 +230,45 @@ function flash(){
     f.classList.add("active");
 }
 
-/* ALERT */
+/* CHECK SYSTEM */
 function check(){
 
     let msg="";
     let danger=false;
 
-    if(t>=25){
-        msg+="🔥 Sıcaklık yüksek ";
+    if(t >= 25){
+        msg += "🔥 Sıcaklık yüksek ";
         danger=true;
+        playAlarm();
     }
 
-    if(h<=35){
-        msg+="💧 Nem düşük ";
+    if(h <= 35){
+        msg += "💧 Nem düşük ";
+        playAlarm();
     }
 
-    if(h>=80){
-        msg+="🌫️ Nem yüksek ";
+    if(h >= 80){
+        msg += "🌫️ Nem yüksek ";
         danger=true;
+        playAlarm();
     }
 
-    /* KRİTİK */
-    if(t>=30 && h>=85){
+    if(t >= 30 && h >= 85){
 
         flash();
-        beep();
-        setTimeout(beep,300);
+        playAlarm();
+        setTimeout(playAlarm,300);
 
         if(navigator.vibrate){
             navigator.vibrate([300,100,300,100,600]);
         }
     }
 
-    let box=document.getElementById("alertBox");
+    let box = document.getElementById("alertBox");
 
-    if(msg===""){
-        box.className="alert";
-        box.innerHTML="Sistem Normal";
+    if(msg === ""){
+        box.className = "alert";
+        box.innerHTML = "Sistem Normal";
         return;
     }
 
@@ -297,14 +278,14 @@ function check(){
 
 /* DATA */
 db.ref("sera/temperature").on("value",snap=>{
-    t=Number(snap.val());
-    temp.innerText=t+"°";
+    t = Number(snap.val());
+    temp.innerText = t + "°";
     check();
 });
 
 db.ref("sera/humidity").on("value",snap=>{
-    h=Number(snap.val());
-    hum.innerText=h+"%";
+    h = Number(snap.val());
+    hum.innerText = h + "%";
     check();
 });
 
