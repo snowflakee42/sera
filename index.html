@@ -12,6 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
@@ -45,13 +46,16 @@ body{
     overflow:hidden;
 }
 
-/* 🌌 arka glow */
+/* 🌌 ARKA PLAN */
 
 .bg1,.bg2{
 
     position:absolute;
+
     border-radius:50%;
+
     filter:blur(120px);
+
     opacity:.35;
 }
 
@@ -77,7 +81,7 @@ body{
     right:-100px;
 }
 
-/* 📦 kart */
+/* 📦 ANA KART */
 
 .card{
 
@@ -101,33 +105,39 @@ body{
     z-index:10;
 }
 
-/* 🌱 başlık */
+/* 🌱 BAŞLIK */
 
 .title{
 
     text-align:center;
+
     margin-bottom:25px;
 }
 
 .title h1{
 
     font-size:28px;
+
     font-weight:600;
 }
 
 .title p{
 
     opacity:.7;
+
     margin-top:6px;
+
     font-size:14px;
 }
 
-/* 📊 veri kutuları */
+/* 📊 VERİ KARTLARI */
 
 .stats{
 
     display:grid;
+
     grid-template-columns:1fr 1fr;
+
     gap:15px;
 
     margin-top:20px;
@@ -156,23 +166,72 @@ body{
 .box .icon{
 
     font-size:30px;
+
     margin-bottom:8px;
 }
 
 .box .value{
 
     font-size:28px;
+
     font-weight:600;
 }
 
 .box .label{
 
     opacity:.7;
+
     margin-top:4px;
+
     font-size:13px;
 }
 
-/* 🚿 pompa */
+/* 🚨 UYARI KUTUSU */
+
+.alert{
+
+    margin-top:20px;
+
+    padding:14px;
+
+    border-radius:16px;
+
+    font-weight:600;
+
+    text-align:center;
+
+    transition:.4s;
+
+    background:rgba(34,197,94,.18);
+
+    border:1px solid rgba(34,197,94,.35);
+
+    color:#86efac;
+}
+
+/* ⚠️ WARNING */
+
+.alert.warning{
+
+    background:rgba(234,179,8,.15);
+
+    border:1px solid rgba(234,179,8,.35);
+
+    color:#fde047;
+}
+
+/* 🚨 DANGER */
+
+.alert.danger{
+
+    background:rgba(239,68,68,.15);
+
+    border:1px solid rgba(239,68,68,.35);
+
+    color:#fca5a5;
+}
+
+/* 🚿 POMPA */
 
 .pump{
 
@@ -192,14 +251,16 @@ body{
     margin-bottom:18px;
 
     font-size:22px;
+
     font-weight:600;
 }
 
-/* 🔘 butonlar */
+/* 🔘 BUTONLAR */
 
 .buttons{
 
     display:flex;
+
     gap:12px;
 }
 
@@ -216,6 +277,7 @@ button{
     cursor:pointer;
 
     font-size:16px;
+
     font-weight:600;
 
     transition:.25s;
@@ -224,12 +286,14 @@ button{
 .on{
 
     background:#22c55e;
+
     color:white;
 }
 
 .off{
 
     background:#ef4444;
+
     color:white;
 }
 
@@ -238,7 +302,7 @@ button:hover{
     transform:scale(1.03);
 }
 
-/* 📱 responsive */
+/* 📱 MOBİL */
 
 @media(max-width:450px){
 
@@ -262,7 +326,8 @@ button:hover{
 <div class="title">
 
 <h1>🌱 Akıllı Sera</h1>
-<p>Canlı ortam izleme sistemi</p>
+
+<p>Canlı Ortam İzleme Sistemi</p>
 
 </div>
 
@@ -298,10 +363,22 @@ Nem
 
 </div>
 
+<!-- 🚨 UYARI -->
+
+<div id="alertBox" class="alert">
+
+✅ Sistem Normal
+
+</div>
+
+<!-- 🚿 POMPA -->
+
 <div class="pump">
 
 <div id="pumpStatus">
+
 ⏳ Bekleniyor
+
 </div>
 
 <div class="buttons">
@@ -342,7 +419,6 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.database();
 
-
 /* 🚿 POMPA */
 
 function setPump(state){
@@ -350,26 +426,87 @@ function setPump(state){
     db.ref("sera/command").set(state);
 }
 
+/* 🚨 ALARM */
+
+let currentTemp = null;
+let currentHum = null;
+
+function checkAlerts(){
+
+    const box =
+    document.getElementById("alertBox");
+
+    // 🔥 SICAKLIK YÜKSEK
+    if(currentTemp >= 25){
+
+        box.className = "alert danger";
+
+        box.innerHTML =
+        "🔥 Sıcaklık çok yüksek!";
+    }
+
+    // ❄️ SICAKLIK DÜŞÜK
+    else if(currentTemp <= 15){
+
+        box.className = "alert warning";
+
+        box.innerHTML =
+        "❄️ Sıcaklık düşük!";
+    }
+
+    // 💧 NEM DÜŞÜK
+    else if(currentHum <= 35){
+
+        box.className = "alert warning";
+
+        box.innerHTML =
+        "💧 Nem çok düşük!";
+    }
+
+    // 🌫️ NEM YÜKSEK
+    else if(currentHum >= 80){
+
+        box.className = "alert danger";
+
+        box.innerHTML =
+        "🌫️ Nem çok yüksek!";
+    }
+
+    // ✅ NORMAL
+    else{
+
+        box.className = "alert";
+
+        box.innerHTML =
+        "✅ Sistem Normal";
+    }
+}
 
 /* 🌡️ SICAKLIK */
 
 db.ref("sera/temperature").on("value",snap=>{
 
-    document.getElementById("temp").innerHTML =
-    (snap.val() ?? "--") + "°";
-});
+    currentTemp = Number(snap.val());
 
+    document.getElementById("temp").innerHTML =
+    currentTemp + "°";
+
+    checkAlerts();
+});
 
 /* 💧 NEM */
 
 db.ref("sera/humidity").on("value",snap=>{
 
+    currentHum = Number(snap.val());
+
     document.getElementById("hum").innerHTML =
-    (snap.val() ?? "--") + "%";
+    currentHum + "%";
+
+    checkAlerts();
 });
 
-
-/* 🚿 DURUM */
+/* 🚿 POMPA DURUM */
 
 db.ref("sera/command").on("value",snap=>{
 
@@ -382,14 +519,12 @@ db.ref("sera/command").on("value",snap=>{
 
         status.innerHTML =
         "🌊 Pompa Aktif";
-
     }
 
     else if(val==="OFF"){
 
         status.innerHTML =
         "⛔ Pompa Kapalı";
-
     }
 
     else{
