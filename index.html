@@ -4,8 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Akıllı Sera Alarm Sistemi</title>
+<title>Akıllı Sera Panel</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -18,7 +17,7 @@ body{
     font-family:Arial;
 
     background:
-    linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
+    linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),
     url("https://images.unsplash.com/photo-1461354464878-ad92f492a5a0")
     no-repeat center center fixed;
 
@@ -34,7 +33,7 @@ body{
 .box{
     width:380px;
     padding:20px;
-    background:rgba(0,0,0,0.65);
+    background:rgba(0,0,0,0.7);
     border-radius:15px;
     text-align:center;
 }
@@ -60,14 +59,12 @@ button{
 
 .hidden{display:none;}
 
-/* ALERT */
 .alert{
     margin-top:10px;
     padding:10px;
     border-radius:10px;
     background:rgba(34,197,94,0.2);
     border:2px solid #22c55e;
-    font-weight:bold;
 }
 
 .alert.danger{
@@ -97,7 +94,7 @@ button{
 }
 
 .flash.active{
-    animation:flash 0.25s 2;
+    animation:flash 0.2s 3;
 }
 
 @keyframes flash{
@@ -134,11 +131,6 @@ button{
 <div>🌡️ <span id="temp">--</span></div>
 <div>💧 <span id="hum">--</span></div>
 
-<!-- 🔊 SES AÇMA BUTONU -->
-<div id="soundBox" class="alert" onclick="enableSound()">
-🔊 Ses sistemi için TIKLA (1 kere)
-</div>
-
 <div id="alertBox" class="alert">Sistem Normal</div>
 
 <button class="green" onclick="setPump('ON')">POMPA AÇ</button>
@@ -153,7 +145,7 @@ button{
 
 <script>
 
-/* FIREBASE */
+/* 🔥 FIREBASE */
 const firebaseConfig = {
     apiKey:"AIzaSyALpR1ATrKkhNZMeDCexRnHTgI56jc39b4",
     authDomain:"sera-61afd.firebaseapp.com",
@@ -170,24 +162,28 @@ let t = 0;
 let h = 0;
 let soundEnabled = false;
 
+/* 🔔 GOOGLE NOTIFICATION İZNİ */
+function askPermission(){
+
+    if("Notification" in window){
+        Notification.requestPermission();
+    }
+}
+
 /* 🔊 SES AÇMA */
-function enableSound(){
+document.addEventListener("click", () => {
 
     const audio = document.getElementById("sound");
 
-    audio.play().then(()=>{
+    audio.play().then(() => {
         audio.pause();
         audio.currentTime = 0;
-
         soundEnabled = true;
+        console.log("SOUND ENABLED");
+    }).catch(()=>{});
 
-        document.getElementById("soundBox").innerText =
-        "🔊 Ses Aktif (Alarm çalışır)";
-
-    }).catch(()=>{
-        alert("Tarayıcı ses izni vermedi, tekrar tıkla");
-    });
-}
+    askPermission();
+});
 
 /* LOGIN */
 function login(){
@@ -200,8 +196,7 @@ function login(){
 
 /* REGISTER */
 function register(){
-    auth.createUserWithEmailAndPassword(email.value,pass.value)
-    .then(()=>alert("Kayıt OK"));
+    auth.createUserWithEmailAndPassword(email.value,pass.value);
 }
 
 /* PUMP */
@@ -209,7 +204,7 @@ function setPump(v){
     db.ref("sera/command").set(v);
 }
 
-/* 🔊 ALARM SES */
+/* 🔊 ALARM */
 function playAlarm(){
 
     if(!soundEnabled) return;
@@ -228,6 +223,23 @@ function flash(){
     f.classList.remove("active");
     void f.offsetWidth;
     f.classList.add("active");
+}
+
+/* 📳 NOTIFICATION + ALARM */
+function triggerAlarm(msg){
+
+    playAlarm();
+    flash();
+
+    if(navigator.vibrate){
+        navigator.vibrate([300,100,300,100,600]);
+    }
+
+    if(Notification.permission === "granted"){
+        new Notification("🌱 SERA ALARM",{
+            body:msg
+        });
+    }
 }
 
 /* CHECK SYSTEM */
@@ -254,14 +266,7 @@ function check(){
     }
 
     if(t >= 30 && h >= 85){
-
-        flash();
-        playAlarm();
-        setTimeout(playAlarm,300);
-
-        if(navigator.vibrate){
-            navigator.vibrate([300,100,300,100,600]);
-        }
+        triggerAlarm("KRİTİK DURUM!");
     }
 
     let box = document.getElementById("alertBox");
@@ -276,7 +281,7 @@ function check(){
     box.innerHTML = msg;
 }
 
-/* DATA */
+/* SENSOR DATA */
 db.ref("sera/temperature").on("value",snap=>{
     t = Number(snap.val());
     temp.innerText = t + "°";
@@ -294,6 +299,7 @@ auth.onAuthStateChanged(user=>{
     if(user){
         loginBox.classList.add("hidden");
         dash.classList.remove("hidden");
+        askPermission();
     }
 });
 
