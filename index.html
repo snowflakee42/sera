@@ -3,233 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> hidroponik sera | Sera Yönetim Merkezi</title>
+    <title>Hidroponik Sera</title>
+
+    <!-- 🔥 FIREBASE (DOĞRU VERSİYON - COMPAT) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
-        :root { --bg: #030712; --card: rgba(17, 24, 39, 0.8); --accent: #38bdf8; --success: #22c55e; --danger: #ef4444; }
-        
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; color: white; overflow: hidden; }
-
-        /* Arka Plan Sera Resmi */
-        .bg-image {
-            background-image: url('https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1600&auto=format&fit=crop'); /* Profesyonel sera resmi */
-            background-size: cover; background-position: center; filter: blur(5px) brightness(0.4);
-            position: absolute; width: 100%; height: 100%; z-index: -1;
-        }
-
-        .flex-center { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 90%; max-width: 380px; background: var(--card); backdrop-filter: blur(15px); padding: 30px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        
-        /* Başlıklar ve Giriş Elemanları */
-        h2 { text-align: center; margin-bottom: 25px; font-weight: 800; color: var(--accent); letter-spacing: 1px; }
-        input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; box-sizing: border-box; font-size: 0.9rem; }
-        input:focus { outline: none; border-color: var(--accent); }
-        button { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 10px; font-size: 0.9rem; }
-        
-        .btn-primary { background: linear-gradient(to right, #0ea5e9, #2563eb); color: white; }
-        .btn-outline { background: transparent; border: 1px solid rgba(56, 189, 248, 0.4); color: var(--accent); }
-        .btn-link { background: transparent; color: #94a3b8; font-size: 0.8rem; text-decoration: underline; padding: 5px; }
-
-        #auth-error { color: var(--danger); font-size: 0.8rem; text-align: center; margin-bottom: 10px; min-height: 1em; }
-
-        /* --- DASHBOARD EKRANI --- */
-        #dashboard-screen { display: none; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; }
-        
-        .header-panel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .stat-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; }
-        .value { font-size: 2.2rem; font-weight: bold; }
-
-        /* Gelişmiş Pompa Kontrolü */
-        .control-card { background: var(--card); border-radius: 20px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        #pumpStatus { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; transition: color 0.3s; }
-        .pump-actions { display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .btn-on { background: var(--success); color: white; }
-        .btn-off { background: var(--danger); color: white; }
-
+        body { font-family: Arial; background:#0b1220; color:white; text-align:center; }
+        button { padding:10px 20px; margin:10px; }
+        .on { background:green; color:white; }
+        .off { background:red; color:white; }
     </style>
 </head>
+
 <body>
-    <div class="bg-image"></div>
 
-    <div class="flex-center">
-        <div id="auth-screen" class="container">
-            <h2>Sera Portalı</h2>
-            <div id="auth-error"></div>
+<h2>🌱 Sera Kontrol Paneli</h2>
 
-            <div id="login-form">
-                <input type="email" id="login-email" placeholder="E-posta Adresi">
-                <input type="password" id="login-password" placeholder="Şifre">
-                <button class="btn-primary" onclick="login()">GİRİŞ YAP</button>
-                <button class="btn-link" onclick="toggleAuthForm()">Hesabınız yok mu? Kayıt Olun</button>
-            </div>
+<p id="status">Durum: Yükleniyor...</p>
 
-            <div id="register-form" style="display:none;">
-                <input type="email" id="reg-email" placeholder="E-posta Adresi">
-                <input type="password" id="reg-password" placeholder="Şifre Oluştur">
-                <input type="password" id="reg-password-confirm" placeholder="Şifreyi Tekrarla">
-                <button class="btn-primary" onclick="register()">KAYIT OL</button>
-                <button class="btn-link" onclick="toggleAuthForm()">Zaten hesabınız var mı? Giriş Yapın</button>
-            </div>
-        </div>
+<button class="on" onclick="setPump(1)">AÇ</button>
+<button class="off" onclick="setPump(0)">KAPAT</button>
 
-        <div id="dashboard-screen">
-            <div class="header-panel card" style="padding:10px 20px; border-radius:15px; background:var(--card);">
-                <div style="font-size:0.9rem; font-weight:bold;">HİDROPONİK AKILLI SERA </div>
-                <button onclick="logout()" class="btn-outline" style="width:auto; margin:0; padding:5px 12px; font-size:0.7rem;">Çıkış</button>
-            </div>
-            
-            <div class="data-grid">
-                <div class="stat-card">
-                    <div class="label">SICAKLIK</div>
-                    <div class="value" id="temp">--°C</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">NEM</div>
-                    <div class="value" id="hum">--%</div>
-                </div>
-            </div>
+<script>
+/* 🔥 FIREBASE AYAR */
+const firebaseConfig = {
+    apiKey: "XXX",
+    databaseURL: "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
+};
 
-            <div class="control-card">
-                <div class="label">Sistem Kontrolü</div>
-                <div id="pumpStatus">BAĞLANILIYOR...</div>
-                
-                <button id="pumpMainBtn" class="btn-outline" onclick="togglePumpControls()">POMPAYI KONTROL ET</button>
-                
-                <div id="pumpActions" class="pump-actions">
-                    <button class="btn-on" onclick="setPump(1)">AÇ</button>
-                    <button class="btn-off" onclick="setPump(0)">KAPAT</button>
-                </div>
-            </div>
-        </div>
-    </div>
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    <script>
-        // --- FIREBASE AYARLARI (KENDİ BİLGİLERİNİZİ YAPIŞTIRIN) ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyALpR1ATrKkhNZMeDCexRnHTgI56jc39b4",
-            databaseURL: "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
+/* 🔥 POMPAYI KONTROL */
+function setPump(val){
+    db.ref("sera").update({
+        pompa: val
+    });
+}
 
-        // --- AUTH FONKSİYONLARI ---
+/* 🔥 CANLI TAKİP */
+db.ref("sera/pompa").on("value", snap => {
+    const val = snap.val();
 
-        // Giriş ve Kayıt formları arasında geçiş yapar
-        function toggleAuthForm() {
-            const loginForm = document.getElementById('login-form');
-            const regForm = document.getElementById('register-form');
-            const errorEl = document.getElementById('auth-error');
-            errorEl.innerText = ""; // Hataları temizle
+    if(val == 1){
+        document.getElementById("status").innerText = "🌊 POMPA AÇIK";
+    } else {
+        document.getElementById("status").innerText = "⛔ POMPA KAPALI";
+    }
+});
+</script>
 
-            if (loginForm.style.display === 'none') {
-                loginForm.style.display = 'block';
-                regForm.style.display = 'none';
-            } else {
-                loginForm.style.display = 'none';
-                regForm.style.display = 'block';
-            }
-        }
-
-        // Kayıt Ol
-        function register() {
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-password').value;
-            const passConf = document.getElementById('reg-password-confirm').value;
-            const errorEl = document.getElementById('auth-error');
-
-            if (pass !== passConf) {
-                errorEl.innerText = "Şifreler eşleşmiyor!";
-                return;
-            }
-
-            auth.createUserWithEmailAndPassword(email, pass)
-                .then(() => alert("Kayıt başarılı! Giriş yapılıyor..."))
-                .catch(err => errorEl.innerText = err.message);
-        }
-
-        // Giriş Yap
-        function login() {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-password').value;
-            const errorEl = document.getElementById('auth-error');
-
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch(err => errorEl.innerText = err.message);
-        }
-
-        // Çıkış Yap
-        function logout() {
-            auth.signOut();
-        }
-
-        // OTURUM DURUMU TAKİBİ
-        auth.onAuthStateChanged(user => {
-            const authScreen = document.getElementById('auth-screen');
-            const dashScreen = document.getElementById('dashboard-screen');
-            const bgImage = document.querySelector('.bg-image');
-
-            if (user) {
-                // Giriş yapıldıysa: Giriş ekranını gizle, paneli göster
-                authScreen.style.display = 'none';
-                dashScreen.style.display = 'block';
-                bgImage.style.filter = "blur(10px) brightness(0.2)"; // Arka planı daha karart
-                loadSeraData(); // Verileri canlı takibe başla
-            } else {
-                // Çıkış yapıldıysa: Paneli gizle, giriş ekranını göster
-                authScreen.style.display = 'block';
-                dashScreen.style.display = 'none';
-                bgImage.style.filter = "blur(5px) brightness(0.4)"; // Eski haline getir
-            }
-        });
-
-        // --- DASHBOARD FONKSİYONLARI ---
-
-        // Firebase'den verileri canlı çeker
-        function loadSeraData() {
-            db.ref('sera').on('value', snap => {
-                const data = snap.val();
-                if(data) {
-                    // Nem ve Sıcaklık
-                    document.getElementById('temp').innerText = (data.sicaklik || 0) + "°C";
-                    document.getElementById('hum').innerText = (data.nem || 0) + "%";
-                    
-                    // Pompa Durumu
-                    const statusEl = document.getElementById('pumpStatus');
-                    if(data.pompa == 1) {
-                        statusEl.innerText = "🌊 SULAMA AKTİF";
-                        statusEl.style.color = "var(--success)";
-                    } else {
-                        statusEl.innerText = "⭕ SİSTEM BEKLEMEDE";
-                        statusEl.style.color = "#94a3b8";
-                    }
-                }
-            });
-        }
-
-        // Pompa kontrol butonlarını (Aç/Kapat) gösterir/gizler
-        function togglePumpControls() {
-            const actionsEl = document.getElementById('pumpActions');
-            if (actionsEl.style.display === 'grid') {
-                actionsEl.style.display = 'none';
-            } else {
-                actionsEl.style.display = 'grid';
-            }
-        }
-
-        // Pompayı Aç (1) veya Kapat (0) komutu gönderir
-        function setPump(deger) {
-            db.ref('sera').update({ pompa: deger })
-                .then(() => {
-                    // Komut gittikten sonra Aç/Kapat butonlarını tekrar gizle
-                    document.getElementById('pumpActions').style.display = 'none';
-                });
-        }
-
-    </script>
 </body>
 </html>
