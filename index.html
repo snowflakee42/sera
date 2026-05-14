@@ -14,28 +14,42 @@
 
 <style>
 
+/* 🌱 ARKA PLAN */
 body{
     margin:0;
     font-family:Poppins;
-    background:linear-gradient(135deg,#0f172a,#111827);
-    color:white;
+
+    background:
+    url("https://images.unsplash.com/photo-1523348837708-15d4a09cfac2")
+    no-repeat center center fixed;
+
+    background-size:cover;
+
     display:flex;
     justify-content:center;
     align-items:center;
     min-height:100vh;
 }
 
+/* GLASS PANEL */
 .card{
-    width:380px;
+    width:400px;
     padding:25px;
     border-radius:25px;
-    background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(18px);
-    box-shadow:0 0 40px rgba(0,0,0,0.5);
+
+    background:rgba(0,0,0,0.55);
+    backdrop-filter:blur(12px);
+
+    box-shadow:0 0 40px rgba(0,0,0,0.6);
+    color:white;
 }
 
-h1{text-align:center;}
+h1{
+    text-align:center;
+    margin-bottom:10px;
+}
 
+/* GRID */
 .grid{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -44,7 +58,7 @@ h1{text-align:center;}
 }
 
 .box{
-    background:rgba(255,255,255,0.07);
+    background:rgba(255,255,255,0.08);
     padding:15px;
     border-radius:15px;
     text-align:center;
@@ -56,34 +70,34 @@ h1{text-align:center;}
 }
 
 /* ALERT */
-
 .alert{
     margin-top:15px;
-    padding:12px;
-    border-radius:12px;
-    background:rgba(34,197,94,0.2);
-    border:1px solid #22c55e;
+    padding:18px;
+    border-radius:15px;
+    font-size:18px;
+    font-weight:700;
+    text-align:center;
+
+    background:rgba(0,0,0,0.4);
+    border:2px solid #22c55e;
 }
 
 .alert.warning{
-    background:rgba(234,179,8,0.2);
-    border:1px solid #eab308;
+    border-color:#eab308;
 }
 
 .alert.danger{
-    background:rgba(239,68,68,0.2);
-    border:1px solid #ef4444;
-    animation:pulse 1s infinite;
+    border-color:#ef4444;
+    animation:pulse 0.8s infinite;
 }
 
 @keyframes pulse{
     0%{transform:scale(1);}
-    50%{transform:scale(1.02);}
+    50%{transform:scale(1.03);}
     100%{transform:scale(1);}
 }
 
 /* BUTTONS */
-
 button{
     width:48%;
     padding:12px;
@@ -103,7 +117,6 @@ button{
 }
 
 /* TOAST */
-
 .toast{
     position:fixed;
     top:20px;
@@ -118,41 +131,24 @@ button{
 
 .toast.show{opacity:1;}
 
-/* 🔴 FULL SCREEN ALARM */
-
-.alarmScreen{
-
+/* 🔴 FLASH */
+.flash{
     position:fixed;
     top:0;
     left:0;
-
     width:100%;
     height:100%;
-
     background:red;
-
-    color:white;
-
-    font-size:30px;
-    font-weight:bold;
-
-    display:none;
-
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-
-    text-align:center;
-
-    z-index:99999;
-
-    animation:flash 0.4s infinite;
+    opacity:0;
+    z-index:9999;
+    pointer-events:none;
+    animation:flashAnim 0.3s ease-in-out 1;
 }
 
-@keyframes flash{
-    0%{opacity:1;}
+@keyframes flashAnim{
+    0%{opacity:0;}
     50%{opacity:0.6;}
-    100%{opacity:1;}
+    100%{opacity:0;}
 }
 
 </style>
@@ -160,9 +156,12 @@ button{
 
 <body>
 
+<!-- FLASH -->
+<div id="flash" class="flash"></div>
+
 <div class="card">
 
-<h1>🌱 Akıllı Sera</h1>
+<h1>🌱 AKILLI SERA</h1>
 
 <div class="grid">
 
@@ -194,12 +193,6 @@ button{
 <!-- TOAST -->
 <div id="toast" class="toast"></div>
 
-<!-- ALARM SCREEN -->
-<div id="alarmScreen" class="alarmScreen">
-🚨 KRİTİK ALARM 🚨
-<div id="alarmText"></div>
-</div>
-
 <!-- SOUND -->
 <audio id="sound">
 <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
@@ -220,8 +213,9 @@ const db = firebase.database();
 let t = null;
 let h = null;
 let lastAlert = "";
+let alarmInterval = null;
 
-/* NOTIF */
+/* NOTIFICATION */
 if(Notification.permission !== "granted"){
     Notification.requestPermission();
 }
@@ -231,18 +225,24 @@ function setPump(s){
     db.ref("sera/command").set(s);
 }
 
-/* 🔊 DOUBLE SOUND */
-function playAlarm(){
+/* 🔊 SIREN */
+function startSiren(){
 
     const audio = document.getElementById("sound");
 
-    audio.currentTime = 0;
-    audio.play();
+    if(alarmInterval) return;
 
-    setTimeout(()=>{
+    alarmInterval = setInterval(()=>{
+
         audio.currentTime = 0;
         audio.play();
-    },250);
+
+    }, 600);
+}
+
+function stopSiren(){
+    clearInterval(alarmInterval);
+    alarmInterval = null;
 }
 
 /* 🔔 NOTIFY */
@@ -260,18 +260,15 @@ function notify(msg){
     }
 }
 
-/* 🔴 CRITICAL ALARM */
-function triggerCritical(msg){
-
-    document.getElementById("alarmText").innerHTML = msg;
-    document.getElementById("alarmScreen").style.display = "flex";
-
-    if(navigator.vibrate){
-        navigator.vibrate([300,100,300,100,600]);
-    }
+/* 🔴 FLASH */
+function flashScreen(){
+    const f = document.getElementById("flash");
+    f.classList.remove("flash");
+    void f.offsetWidth;
+    f.classList.add("flash");
 }
 
-/* CHECK SYSTEM */
+/* CHECK */
 function check(){
 
     let alerts = [];
@@ -295,9 +292,16 @@ function check(){
         danger = true;
     }
 
-    /* 🔴 KRİTİK KOMBO */
+    /* KRİTİK */
     if(t >= 30 && h >= 85){
-        triggerCritical("🔥 SICAKLIK + NEM KRİTİK!");
+
+        notify("🔥 KRİTİK DURUM!");
+        flashScreen();
+        startSiren();
+
+        if(navigator.vibrate){
+            navigator.vibrate([300,100,300,100,600]);
+        }
     }
 
     let text = alerts.join(" | ");
@@ -306,13 +310,15 @@ function check(){
 
         lastAlert = text;
 
-        playAlarm();
         notify(text);
     }
 
     let box = document.getElementById("alertBox");
 
     if(alerts.length === 0){
+
+        stopSiren();
+
         box.className = "alert";
         box.innerHTML = "✅ Sistem Normal";
         return;
@@ -322,14 +328,13 @@ function check(){
     box.innerHTML = alerts.join("<br>");
 }
 
-/* TEMP */
+/* DATA */
 db.ref("sera/temperature").on("value",snap=>{
     t = Number(snap.val());
     document.getElementById("temp").innerText = t + "°";
     check();
 });
 
-/* HUM */
 db.ref("sera/humidity").on("value",snap=>{
     h = Number(snap.val());
     document.getElementById("hum").innerText = h + "%";
@@ -341,11 +346,6 @@ db.ref("sera/command").on("value",snap=>{
     document.getElementById("pumpStatus").innerText =
     snap.val() === "ON" ? "🌊 AÇIK" : "⛔ KAPALI";
 });
-
-/* CLOSE ALARM ON CLICK */
-document.getElementById("alarmScreen").onclick = function(){
-    this.style.display = "none";
-};
 
 </script>
 
