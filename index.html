@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Akıllı Sera Alarm Sistemi</title>
+<title>Akıllı Hidroponik Sera</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -14,13 +14,14 @@
 
 <style>
 
-/* 🌱 ARKA PLAN */
+/* 🌱 HYDROPONIC BACKGROUND */
 body{
     margin:0;
     font-family:Poppins;
 
     background:
-    url("https://images.unsplash.com/photo-1523348837708-15d4a09cfac2")
+    linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),
+    url("https://images.unsplash.com/photo-1586771107445-d3ca888129ff")
     no-repeat center center fixed;
 
     background-size:cover;
@@ -31,22 +32,22 @@ body{
     min-height:100vh;
 }
 
-/* GLASS PANEL */
+/* CARD */
 .card{
-    width:400px;
+    width:420px;
     padding:25px;
     border-radius:25px;
 
-    background:rgba(0,0,0,0.55);
-    backdrop-filter:blur(12px);
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(10px);
 
-    box-shadow:0 0 40px rgba(0,0,0,0.6);
     color:white;
+    box-shadow:0 0 40px rgba(0,0,0,0.7);
 }
 
+/* TITLE */
 h1{
     text-align:center;
-    margin-bottom:10px;
 }
 
 /* GRID */
@@ -54,7 +55,6 @@ h1{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:15px;
-    margin-top:15px;
 }
 
 .box{
@@ -65,7 +65,7 @@ h1{
 }
 
 .value{
-    font-size:28px;
+    font-size:30px;
     font-weight:bold;
 }
 
@@ -74,11 +74,9 @@ h1{
     margin-top:15px;
     padding:18px;
     border-radius:15px;
-    font-size:18px;
-    font-weight:700;
     text-align:center;
-
-    background:rgba(0,0,0,0.4);
+    font-weight:800;
+    background:rgba(34,197,94,0.2);
     border:2px solid #22c55e;
 }
 
@@ -88,13 +86,15 @@ h1{
 
 .alert.danger{
     border-color:#ef4444;
-    animation:pulse 0.8s infinite;
+    animation:shake 0.6s infinite;
 }
 
-@keyframes pulse{
-    0%{transform:scale(1);}
-    50%{transform:scale(1.03);}
-    100%{transform:scale(1);}
+@keyframes shake{
+    0%{transform:translateX(0);}
+    25%{transform:translateX(-3px);}
+    50%{transform:translateX(3px);}
+    75%{transform:translateX(-3px);}
+    100%{transform:translateX(0);}
 }
 
 /* BUTTONS */
@@ -131,7 +131,7 @@ button{
 
 .toast.show{opacity:1;}
 
-/* 🔴 FLASH */
+/* 🔴 FULL SCREEN FLASH */
 .flash{
     position:fixed;
     top:0;
@@ -139,15 +139,18 @@ button{
     width:100%;
     height:100%;
     background:red;
-    opacity:0;
     z-index:9999;
+    opacity:0;
     pointer-events:none;
-    animation:flashAnim 0.3s ease-in-out 1;
+}
+
+.flash.active{
+    animation:flashAnim 0.25s 2;
 }
 
 @keyframes flashAnim{
     0%{opacity:0;}
-    50%{opacity:0.6;}
+    50%{opacity:0.8;}
     100%{opacity:0;}
 }
 
@@ -156,12 +159,11 @@ button{
 
 <body>
 
-<!-- FLASH -->
-<div id="flash" class="flash"></div>
+<div class="flash" id="flash"></div>
 
 <div class="card">
 
-<h1>🌱 AKILLI SERA</h1>
+<h1>🌱 Hidroponik Sera</h1>
 
 <div class="grid">
 
@@ -193,9 +195,9 @@ button{
 <!-- TOAST -->
 <div id="toast" class="toast"></div>
 
-<!-- SOUND -->
-<audio id="sound">
-<source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
+<!-- 🔊 SOUND (MUTLAKA USER INTERACTION GEREKİR) -->
+<audio id="sound" preload="auto">
+<source src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg">
 </audio>
 
 <script>
@@ -210,65 +212,47 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /* STATE */
-let t = null;
-let h = null;
+let t = 0;
+let h = 0;
 let lastAlert = "";
-let alarmInterval = null;
 
-/* NOTIFICATION */
-if(Notification.permission !== "granted"){
-    Notification.requestPermission();
-}
+/* 🔥 SOUND FIX (autoplay unlock) */
+let audioUnlocked = false;
+
+document.body.addEventListener("click", ()=>{
+    document.getElementById("sound").play().then(()=>{
+        document.getElementById("sound").pause();
+        audioUnlocked = true;
+    });
+});
 
 /* PUMP */
 function setPump(s){
     db.ref("sera/command").set(s);
 }
 
-/* 🔊 SIREN */
-function startSiren(){
+/* 🔊 SOUND */
+function playSound(){
+
+    if(!audioUnlocked) return;
 
     const audio = document.getElementById("sound");
 
-    if(alarmInterval) return;
-
-    alarmInterval = setInterval(()=>{
-
-        audio.currentTime = 0;
-        audio.play();
-
-    }, 600);
+    audio.currentTime = 0;
+    audio.play();
 }
 
-function stopSiren(){
-    clearInterval(alarmInterval);
-    alarmInterval = null;
-}
+/* 🔴 FLASH FIX */
+function flash(){
 
-/* 🔔 NOTIFY */
-function notify(msg){
-
-    document.getElementById("toast").innerText = msg;
-    document.getElementById("toast").classList.add("show");
-
-    setTimeout(()=>{
-        document.getElementById("toast").classList.remove("show");
-    },2500);
-
-    if(Notification.permission === "granted"){
-        new Notification("🌱 Sera Alarm",{body:msg});
-    }
-}
-
-/* 🔴 FLASH */
-function flashScreen(){
     const f = document.getElementById("flash");
-    f.classList.remove("flash");
+
+    f.classList.remove("active");
     void f.offsetWidth;
-    f.classList.add("flash");
+    f.classList.add("active");
 }
 
-/* CHECK */
+/* ALERT */
 function check(){
 
     let alerts = [];
@@ -277,10 +261,6 @@ function check(){
     if(t >= 25){
         alerts.push("🔥 Sıcaklık yüksek!");
         danger = true;
-    }
-
-    if(t <= 15){
-        alerts.push("❄️ Sıcaklık düşük!");
     }
 
     if(h <= 35){
@@ -295,9 +275,10 @@ function check(){
     /* KRİTİK */
     if(t >= 30 && h >= 85){
 
-        notify("🔥 KRİTİK DURUM!");
-        flashScreen();
-        startSiren();
+        flash();
+
+        playSound();
+        setTimeout(playSound, 300);
 
         if(navigator.vibrate){
             navigator.vibrate([300,100,300,100,600]);
@@ -310,14 +291,12 @@ function check(){
 
         lastAlert = text;
 
-        notify(text);
+        playSound();
     }
 
     let box = document.getElementById("alertBox");
 
     if(alerts.length === 0){
-
-        stopSiren();
 
         box.className = "alert";
         box.innerHTML = "✅ Sistem Normal";
