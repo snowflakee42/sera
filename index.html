@@ -5,41 +5,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Akıllı Sera Login System</title>
+<title>Akıllı Hidroponik Sera</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
 <style>
 
 body{
     margin:0;
-    font-family:Poppins;
+    font-family:Arial;
 
+    /* 🌱 ARKA PLAN FIX */
     background:
-    linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
+    linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),
     url("https://cdn.prod.website-files.com/680a070c3b99253410dd3df5/684d84f335cd45ba1f374612_68484d93e48a9df6b4587d3a_hydroponic-farming_Fig%201.webp")
     no-repeat center center fixed;
 
     background-size:cover;
 
+    color:white;
     display:flex;
     justify-content:center;
     align-items:center;
     min-height:100vh;
-    color:white;
 }
 
-/* BOX */
+/* PANEL */
 .box{
-    width:360px;
-    padding:25px;
-    border-radius:20px;
+    width:380px;
+    padding:20px;
     background:rgba(0,0,0,0.65);
-    backdrop-filter:blur(10px);
+    border-radius:18px;
     text-align:center;
 }
 
@@ -47,9 +45,7 @@ body{
 input{
     width:90%;
     padding:10px;
-    margin:6px;
-    border:none;
-    border-radius:8px;
+    margin:5px;
 }
 
 /* BUTTON */
@@ -66,19 +62,52 @@ button{
 .green{background:#22c55e;color:white;}
 .red{background:#ef4444;color:white;}
 
-/* DASHBOARD */
 .hidden{display:none;}
 
+/* ALERT */
 .alert{
     margin-top:10px;
     padding:10px;
     border-radius:10px;
     background:rgba(34,197,94,0.2);
-    border:1px solid #22c55e;
+    border:2px solid #22c55e;
+    font-weight:bold;
 }
 
 .alert.danger{
     border-color:#ef4444;
+    animation:shake 0.4s infinite;
+}
+
+@keyframes shake{
+    0%{transform:translateX(0);}
+    25%{transform:translateX(-3px);}
+    50%{transform:translateX(3px);}
+    75%{transform:translateX(-3px);}
+    100%{transform:translateX(0);}
+}
+
+/* 🔴 FLASH */
+.flash{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:red;
+    opacity:0;
+    pointer-events:none;
+    z-index:9999;
+}
+
+.flash.active{
+    animation:flashAnim 0.25s 2;
+}
+
+@keyframes flashAnim{
+    0%{opacity:0;}
+    50%{opacity:0.8;}
+    100%{opacity:0;}
 }
 
 </style>
@@ -86,25 +115,18 @@ button{
 
 <body>
 
+<div class="flash" id="flash"></div>
+
 <!-- LOGIN -->
 <div id="loginBox" class="box">
 
 <h2>🌱 Giriş</h2>
 
-<input id="loginEmail" placeholder="Email">
-<input id="loginPass" type="password" placeholder="Şifre">
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Şifre">
 
-<button class="green" onclick="login()">Giriş Yap</button>
-
-<hr>
-
-<h3>Kayıt Ol</h3>
-
-<input id="regEmail" placeholder="Email">
-<input id="regPass" type="password" placeholder="Şifre">
-<input id="regPass2" type="password" placeholder="Şifre Tekrar">
-
-<button class="red" onclick="register()">Kayıt Ol</button>
+<button class="green" onclick="login()">Giriş</button>
+<button class="red" onclick="register()">Kayıt</button>
 
 </div>
 
@@ -121,11 +143,9 @@ button{
 <button class="green" onclick="setPump('ON')">POMPA AÇ</button>
 <button class="red" onclick="setPump('OFF')">POMPA KAPAT</button>
 
-<button onclick="logout()">Çıkış</button>
-
 </div>
 
-<!-- SOUND -->
+<!-- 🔊 SOUND -->
 <audio id="sound">
 <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
 </audio>
@@ -144,29 +164,23 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-/* REGISTER */
-function register(){
+/* STATE */
+let t = 0;
+let h = 0;
+let audioReady = false;
 
-    let email = regEmail.value;
-    let pass = regPass.value;
-    let pass2 = regPass2.value;
-
-    if(pass !== pass2){
-        alert("Şifreler aynı değil!");
-        return;
-    }
-
-    auth.createUserWithEmailAndPassword(email,pass)
-    .then(()=>{
-        alert("Kayıt başarılı");
-    })
-    .catch(e=>alert(e.message));
-}
+/* 🔊 AUDIO UNLOCK (FIX) */
+document.addEventListener("click", ()=>{
+    const a = document.getElementById("sound");
+    a.play().then(()=>{
+        a.pause();
+        audioReady = true;
+    }).catch(()=>{});
+});
 
 /* LOGIN */
 function login(){
-
-    auth.signInWithEmailAndPassword(loginEmail.value,loginPass.value)
+    auth.signInWithEmailAndPassword(email.value,pass.value)
     .then(()=>{
         loginBox.classList.add("hidden");
         dash.classList.remove("hidden");
@@ -174,11 +188,93 @@ function login(){
     .catch(e=>alert(e.message));
 }
 
-/* LOGOUT */
-function logout(){
-    auth.signOut();
-    location.reload();
+/* REGISTER */
+function register(){
+    auth.createUserWithEmailAndPassword(email.value,pass.value)
+    .then(()=>alert("Kayıt OK"))
+    .catch(e=>alert(e.message));
 }
+
+/* PUMP */
+function setPump(v){
+    db.ref("sera/command").set(v);
+}
+
+/* 🔊 SOUND */
+function beep(){
+
+    if(!audioReady) return;
+
+    const a = document.getElementById("sound");
+    a.currentTime = 0;
+    a.play();
+}
+
+/* 🔴 FLASH */
+function flash(){
+
+    const f = document.getElementById("flash");
+
+    f.classList.remove("active");
+    void f.offsetWidth;
+    f.classList.add("active");
+}
+
+/* ALERT SYSTEM */
+function check(){
+
+    let alert = "";
+    let danger = false;
+
+    if(t >= 25){
+        alert += "🔥 Sıcaklık yüksek ";
+        danger = true;
+    }
+
+    if(h <= 35){
+        alert += "💧 Nem düşük ";
+    }
+
+    if(h >= 80){
+        alert += "🌫️ Nem yüksek ";
+        danger = true;
+    }
+
+    if(t >= 30 && h >= 85){
+
+        flash();
+        beep();
+        setTimeout(beep,300);
+
+        if(navigator.vibrate){
+            navigator.vibrate([200,100,200,100,500]);
+        }
+    }
+
+    const box = document.getElementById("alertBox");
+
+    if(alert === ""){
+        box.className = "alert";
+        box.innerHTML = "Sistem Normal";
+        return;
+    }
+
+    box.className = danger ? "alert danger" : "alert";
+    box.innerHTML = alert;
+}
+
+/* DATA */
+db.ref("sera/temperature").on("value",snap=>{
+    t = Number(snap.val());
+    temp.innerText = t + "°";
+    check();
+});
+
+db.ref("sera/humidity").on("value",snap=>{
+    h = Number(snap.val());
+    hum.innerText = h + "%";
+    check();
+});
 
 /* AUTH STATE */
 auth.onAuthStateChanged(user=>{
@@ -186,35 +282,6 @@ auth.onAuthStateChanged(user=>{
         loginBox.classList.add("hidden");
         dash.classList.remove("hidden");
     }
-});
-
-/* PUMP */
-function setPump(s){
-    db.ref("sera/command").set(s);
-}
-
-/* ALERT LOGIC */
-function check(t,h){
-
-    if(t>=30 && h>=85){
-        document.getElementById("alertBox").innerText = "🔥 KRİTİK!";
-        document.getElementById("alertBox").classList.add("danger");
-    }else{
-        document.getElementById("alertBox").innerText = "Sistem Normal";
-        document.getElementById("alertBox").classList.remove("danger");
-    }
-}
-
-/* SENSOR */
-db.ref("sera/temperature").on("value",snap=>{
-    let t = snap.val();
-    temp.innerText = t + "°";
-});
-
-db.ref("sera/humidity").on("value",snap=>{
-    let h = snap.val();
-    hum.innerText = h + "%";
-    check(Number(temp.innerText), Number(h));
 });
 
 </script>
