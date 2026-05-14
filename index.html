@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sera Paneli</title>
+<title>Akıllı Sera Sistemi</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -14,53 +14,56 @@
 
 body{
     margin:0;
-    font-family:Arial;
-    background:linear-gradient(135deg,#0b1220,#123);
+    background:#0b1220;
     color:white;
+    font-family:Arial;
     text-align:center;
 }
 
+.container{
+    margin-top:50px;
+}
+
 .card{
-    width:90%;
-    max-width:400px;
-    margin:50px auto;
-    padding:30px;
-    background:rgba(255,255,255,0.05);
+    background:#111827;
+    width:320px;
+    margin:auto;
+    padding:25px;
     border-radius:20px;
     box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
 
 h1{
-    margin-bottom:20px;
+    margin-bottom:30px;
 }
 
 .data{
-    margin:15px;
     font-size:22px;
+    margin:15px;
 }
 
 button{
-    padding:15px 25px;
     border:none;
-    border-radius:10px;
-    margin:10px;
+    padding:15px 25px;
+    border-radius:12px;
     font-size:18px;
     cursor:pointer;
+    margin:10px;
 }
 
 .on{
-    background:#00c853;
+    background:#22c55e;
     color:white;
 }
 
 .off{
-    background:#d50000;
+    background:#ef4444;
     color:white;
 }
 
-#status{
-    margin:20px;
-    font-size:24px;
+#pumpStatus{
+    margin-top:20px;
+    font-size:22px;
 }
 
 </style>
@@ -69,11 +72,11 @@ button{
 
 <body>
 
+<div class="container">
+
 <div class="card">
 
-<h1>🌱 Hidroponik Sera</h1>
-
-<div id="status">Bekleniyor...</div>
+<h1>🌱 Akıllı Sera</h1>
 
 <div class="data">
 🌡️ Sıcaklık:
@@ -85,21 +88,31 @@ button{
 <span id="hum">--</span> %
 </div>
 
+<div id="pumpStatus">
+⏳ Bekleniyor...
+</div>
+
 <button class="on" onclick="setPump('ON')">
-🚀 AÇ
+POMPA AÇ
 </button>
 
 <button class="off" onclick="setPump('OFF')">
-⛔ KAPAT
+POMPA KAPAT
 </button>
+
+</div>
 
 </div>
 
 <script>
 
+// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
+
     apiKey: "XXX",
-    databaseURL: "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
+
+    databaseURL:
+    "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -107,36 +120,51 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 
-// 🔥 POMPA KONTROL
-function setPump(v){
-    db.ref("sera/command").set(v);
+// 🚿 POMPA KONTROL
+function setPump(state){
+
+    db.ref("sera/command").set(state);
 }
 
 
-// 🔥 POMPA DURUMU
-db.ref("sera/command").on("value", snap=>{
-
-    const v = snap.val();
-
-    if(v==="ON"){
-        status.innerText="🌊 Pompa Açık";
-    }
-
-    else if(v==="OFF"){
-        status.innerText="⛔ Pompa Kapalı";
-    }
-});
-
-
 // 🌡️ SICAKLIK
-db.ref("sera/temperature").on("value", snap=>{
-    temp.innerText = snap.val();
+db.ref("sera/temperature").on("value", snap => {
+
+    document.getElementById("temp").innerText =
+    snap.val() ?? "--";
 });
 
 
 // 💧 NEM
-db.ref("sera/humidity").on("value", snap=>{
-    hum.innerText = snap.val();
+db.ref("sera/humidity").on("value", snap => {
+
+    document.getElementById("hum").innerText =
+    snap.val() ?? "--";
+});
+
+
+// 🚿 POMPA DURUM
+db.ref("sera/command").on("value", snap => {
+
+    const val = snap.val();
+
+    if(val === "ON"){
+
+        document.getElementById("pumpStatus").innerHTML =
+        "🌊 Pompa Açık";
+    }
+
+    else if(val === "OFF"){
+
+        document.getElementById("pumpStatus").innerHTML =
+        "⛔ Pompa Kapalı";
+    }
+
+    else{
+
+        document.getElementById("pumpStatus").innerHTML =
+        "⏳ Bekleniyor...";
+    }
 });
 
 </script>
