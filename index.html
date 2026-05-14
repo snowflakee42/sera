@@ -1,69 +1,251 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Akıllı Sera Sistemi</title>
+<title>Akıllı Hidroponik Sera</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 
-body{
+*{
     margin:0;
-    background:#0b1220;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:'Poppins',sans-serif;
+
+    background:
+    linear-gradient(
+    135deg,
+    #0f172a,
+    #111827,
+    #07111f
+    );
+
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
     color:white;
-    font-family:Arial;
+
+    overflow:hidden;
+}
+
+/* 🌌 arka glow */
+
+.bg1,.bg2{
+
+    position:absolute;
+    border-radius:50%;
+    filter:blur(120px);
+    opacity:.35;
+}
+
+.bg1{
+
+    width:350px;
+    height:350px;
+
+    background:#22c55e;
+
+    top:-100px;
+    left:-100px;
+}
+
+.bg2{
+
+    width:300px;
+    height:300px;
+
+    background:#0ea5e9;
+
+    bottom:-120px;
+    right:-100px;
+}
+
+/* 📦 kart */
+
+.card{
+
+    position:relative;
+
+    width:360px;
+
+    padding:30px;
+
+    border-radius:28px;
+
+    background:rgba(255,255,255,.08);
+
+    border:1px solid rgba(255,255,255,.15);
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:
+    0 10px 40px rgba(0,0,0,.45);
+
+    z-index:10;
+}
+
+/* 🌱 başlık */
+
+.title{
+
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.title h1{
+
+    font-size:28px;
+    font-weight:600;
+}
+
+.title p{
+
+    opacity:.7;
+    margin-top:6px;
+    font-size:14px;
+}
+
+/* 📊 veri kutuları */
+
+.stats{
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+
+    margin-top:20px;
+}
+
+.box{
+
+    background:rgba(255,255,255,.07);
+
+    border-radius:20px;
+
+    padding:18px;
+
+    text-align:center;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    transition:.3s;
+}
+
+.box:hover{
+
+    transform:translateY(-4px);
+}
+
+.box .icon{
+
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.box .value{
+
+    font-size:28px;
+    font-weight:600;
+}
+
+.box .label{
+
+    opacity:.7;
+    margin-top:4px;
+    font-size:13px;
+}
+
+/* 🚿 pompa */
+
+.pump{
+
+    margin-top:25px;
+
+    background:rgba(255,255,255,.06);
+
+    border-radius:18px;
+
+    padding:20px;
+
     text-align:center;
 }
 
-.container{
-    margin-top:50px;
-}
+#pumpStatus{
 
-.card{
-    background:#111827;
-    width:320px;
-    margin:auto;
-    padding:25px;
-    border-radius:20px;
-    box-shadow:0 0 20px rgba(0,0,0,0.4);
-}
+    margin-bottom:18px;
 
-h1{
-    margin-bottom:30px;
-}
-
-.data{
     font-size:22px;
-    margin:15px;
+    font-weight:600;
+}
+
+/* 🔘 butonlar */
+
+.buttons{
+
+    display:flex;
+    gap:12px;
 }
 
 button{
+
+    flex:1;
+
     border:none;
-    padding:15px 25px;
-    border-radius:12px;
-    font-size:18px;
+
+    padding:14px;
+
+    border-radius:14px;
+
     cursor:pointer;
-    margin:10px;
+
+    font-size:16px;
+    font-weight:600;
+
+    transition:.25s;
 }
 
 .on{
+
     background:#22c55e;
     color:white;
 }
 
 .off{
+
     background:#ef4444;
     color:white;
 }
 
-#pumpStatus{
-    margin-top:20px;
-    font-size:22px;
+button:hover{
+
+    transform:scale(1.03);
+}
+
+/* 📱 responsive */
+
+@media(max-width:450px){
+
+    .card{
+
+        width:92%;
+    }
 }
 
 </style>
@@ -72,33 +254,73 @@ button{
 
 <body>
 
-<div class="container">
+<div class="bg1"></div>
+<div class="bg2"></div>
 
 <div class="card">
 
+<div class="title">
+
 <h1>🌱 Akıllı Sera</h1>
+<p>Canlı ortam izleme sistemi</p>
 
-<div class="data">
-🌡️ Sıcaklık:
-<span id="temp">--</span> °C
 </div>
 
-<div class="data">
-💧 Nem:
-<span id="hum">--</span> %
+<div class="stats">
+
+<div class="box">
+
+<div class="icon">🌡️</div>
+
+<div class="value" id="temp">
+--
 </div>
+
+<div class="label">
+Sıcaklık
+</div>
+
+</div>
+
+<div class="box">
+
+<div class="icon">💧</div>
+
+<div class="value" id="hum">
+--
+</div>
+
+<div class="label">
+Nem
+</div>
+
+</div>
+
+</div>
+
+<div class="pump">
 
 <div id="pumpStatus">
-⏳ Bekleniyor...
+⏳ Bekleniyor
 </div>
 
-<button class="on" onclick="setPump('ON')">
+<div class="buttons">
+
+<button class="on"
+onclick="setPump('ON')">
+
 POMPA AÇ
+
 </button>
 
-<button class="off" onclick="setPump('OFF')">
-POMPA KAPAT
+<button class="off"
+onclick="setPump('OFF')">
+
+KAPAT
+
 </button>
+
+</div>
 
 </div>
 
@@ -106,10 +328,11 @@ POMPA KAPAT
 
 <script>
 
-// 🔥 FIREBASE CONFIG
+/* 🔥 FIREBASE */
+
 const firebaseConfig = {
 
-    apiKey: "AIzaSyALpR1ATrKkhNZMeDCexRnHTgI56jc39b4",
+    apiKey:"AIzaSyALpR1ATrKkhNZMeDCexRnHTgI56jc39b4",
 
     databaseURL:
     "https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
@@ -120,50 +343,59 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 
-// 🚿 POMPA KONTROL
+/* 🚿 POMPA */
+
 function setPump(state){
 
     db.ref("sera/command").set(state);
 }
 
 
-// 🌡️ SICAKLIK
-db.ref("sera/temperature").on("value", snap => {
+/* 🌡️ SICAKLIK */
 
-    document.getElementById("temp").innerText =
-    snap.val() ?? "--";
+db.ref("sera/temperature").on("value",snap=>{
+
+    document.getElementById("temp").innerHTML =
+    (snap.val() ?? "--") + "°";
 });
 
 
-// 💧 NEM
-db.ref("sera/humidity").on("value", snap => {
+/* 💧 NEM */
 
-    document.getElementById("hum").innerText =
-    snap.val() ?? "--";
+db.ref("sera/humidity").on("value",snap=>{
+
+    document.getElementById("hum").innerHTML =
+    (snap.val() ?? "--") + "%";
 });
 
 
-// 🚿 POMPA DURUM
-db.ref("sera/command").on("value", snap => {
+/* 🚿 DURUM */
+
+db.ref("sera/command").on("value",snap=>{
 
     const val = snap.val();
 
-    if(val === "ON"){
+    const status =
+    document.getElementById("pumpStatus");
 
-        document.getElementById("pumpStatus").innerHTML =
-        "🌊 Pompa Açık";
+    if(val==="ON"){
+
+        status.innerHTML =
+        "🌊 Pompa Aktif";
+
     }
 
-    else if(val === "OFF"){
+    else if(val==="OFF"){
 
-        document.getElementById("pumpStatus").innerHTML =
+        status.innerHTML =
         "⛔ Pompa Kapalı";
+
     }
 
     else{
 
-        document.getElementById("pumpStatus").innerHTML =
-        "⏳ Bekleniyor...";
+        status.innerHTML =
+        "⏳ Bekleniyor";
     }
 });
 
