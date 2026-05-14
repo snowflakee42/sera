@@ -5,12 +5,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Akıllı Sera Sistemi</title>
+<title>Akıllı Sera Alarm Sistemi</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
 
@@ -34,15 +34,13 @@ body{
     box-shadow:0 0 40px rgba(0,0,0,0.5);
 }
 
-h1{
-    text-align:center;
-    margin-bottom:20px;
-}
+h1{text-align:center;}
 
 .grid{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:15px;
+    margin-top:15px;
 }
 
 .box{
@@ -75,17 +73,24 @@ h1{
 .alert.danger{
     background:rgba(239,68,68,0.2);
     border:1px solid #ef4444;
+    animation:pulse 1s infinite;
 }
 
-/* POMPA */
+@keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.02);}
+    100%{transform:scale(1);}
+}
+
+/* BUTTONS */
 
 button{
     width:48%;
     padding:12px;
     border:none;
     border-radius:12px;
-    cursor:pointer;
     font-weight:bold;
+    cursor:pointer;
 }
 
 .on{background:#22c55e;color:white;}
@@ -104,26 +109,50 @@ button{
     top:20px;
     right:20px;
     background:#ef4444;
+    color:white;
     padding:12px 18px;
     border-radius:10px;
     opacity:0;
-    transition:0.3s;
+    transition:.3s;
 }
 
-.toast.show{
-    opacity:1;
+.toast.show{opacity:1;}
+
+/* 🔴 FULL SCREEN ALARM */
+
+.alarmScreen{
+
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background:red;
+
+    color:white;
+
+    font-size:30px;
+    font-weight:bold;
+
+    display:none;
+
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    z-index:99999;
+
+    animation:flash 0.4s infinite;
 }
 
-/* ANIMATION */
-
-@keyframes pulse{
-    0%{transform:scale(1);}
-    50%{transform:scale(1.02);}
-    100%{transform:scale(1);}
-}
-
-.danger{
-    animation:pulse 1s infinite;
+@keyframes flash{
+    0%{opacity:1;}
+    50%{opacity:0.6;}
+    100%{opacity:1;}
 }
 
 </style>
@@ -158,15 +187,22 @@ button{
 <button class="off" onclick="setPump('OFF')">KAPAT</button>
 </div>
 
-<div style="text-align:center;margin-top:10px;" id="pumpStatus">⏳</div>
+<div id="pumpStatus" style="text-align:center;margin-top:10px;">⏳</div>
 
 </div>
 
-<!-- TOAST + SOUND -->
+<!-- TOAST -->
 <div id="toast" class="toast"></div>
 
+<!-- ALARM SCREEN -->
+<div id="alarmScreen" class="alarmScreen">
+🚨 KRİTİK ALARM 🚨
+<div id="alarmText"></div>
+</div>
+
+<!-- SOUND -->
 <audio id="sound">
-<source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
+<source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
 </audio>
 
 <script>
@@ -180,11 +216,36 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* NOTIFICATION */
+/* STATE */
+let t = null;
+let h = null;
+let lastAlert = "";
+
+/* NOTIF */
 if(Notification.permission !== "granted"){
     Notification.requestPermission();
 }
 
+/* PUMP */
+function setPump(s){
+    db.ref("sera/command").set(s);
+}
+
+/* 🔊 DOUBLE SOUND */
+function playAlarm(){
+
+    const audio = document.getElementById("sound");
+
+    audio.currentTime = 0;
+    audio.play();
+
+    setTimeout(()=>{
+        audio.currentTime = 0;
+        audio.play();
+    },250);
+}
+
+/* 🔔 NOTIFY */
 function notify(msg){
 
     document.getElementById("toast").innerText = msg;
@@ -194,62 +255,97 @@ function notify(msg){
         document.getElementById("toast").classList.remove("show");
     },2500);
 
-    document.getElementById("sound").play();
-
     if(Notification.permission === "granted"){
-        new Notification("Sera Uyarı", {body:msg});
+        new Notification("🌱 Sera Alarm",{body:msg});
     }
 }
 
-/* POMPA */
-function setPump(s){
-    db.ref("sera/command").set(s);
+/* 🔴 CRITICAL ALARM */
+function triggerCritical(msg){
+
+    document.getElementById("alarmText").innerHTML = msg;
+    document.getElementById("alarmScreen").style.display = "flex";
+
+    if(navigator.vibrate){
+        navigator.vibrate([300,100,300,100,600]);
+    }
 }
 
-/* DATA */
-let t=null, h=null;
-
+/* CHECK SYSTEM */
 function check(){
 
-    let a=[];
-    let d=false;
+    let alerts = [];
+    let danger = false;
 
-    if(t>=25){a.push("🔥 Sıcaklık yüksek");d=true;notify("🔥 Sıcaklık yüksek");}
-    if(t<=15){a.push("❄️ Sıcaklık düşük");notify("❄️ Sıcaklık düşük");}
-    if(h<=35){a.push("💧 Nem düşük");notify("💧 Nem düşük");}
-    if(h>=80){a.push("🌫️ Nem yüksek");d=true;notify("🌫️ Nem yüksek");}
+    if(t >= 25){
+        alerts.push("🔥 Sıcaklık yüksek!");
+        danger = true;
+    }
 
-    let box=document.getElementById("alertBox");
+    if(t <= 15){
+        alerts.push("❄️ Sıcaklık düşük!");
+    }
 
-    if(a.length==0){
-        box.className="alert";
-        box.innerHTML="✅ Sistem Normal";
+    if(h <= 35){
+        alerts.push("💧 Nem düşük!");
+    }
+
+    if(h >= 80){
+        alerts.push("🌫️ Nem yüksek!");
+        danger = true;
+    }
+
+    /* 🔴 KRİTİK KOMBO */
+    if(t >= 30 && h >= 85){
+        triggerCritical("🔥 SICAKLIK + NEM KRİTİK!");
+    }
+
+    let text = alerts.join(" | ");
+
+    if(text !== "" && text !== lastAlert){
+
+        lastAlert = text;
+
+        playAlarm();
+        notify(text);
+    }
+
+    let box = document.getElementById("alertBox");
+
+    if(alerts.length === 0){
+        box.className = "alert";
+        box.innerHTML = "✅ Sistem Normal";
         return;
     }
 
-    box.className=d?"alert danger":"alert warning";
-    box.innerHTML=a.join("<br>");
+    box.className = danger ? "alert danger" : "alert warning";
+    box.innerHTML = alerts.join("<br>");
 }
 
 /* TEMP */
-db.ref("sera/temperature").on("value",s=>{
-    t=Number(s.val());
-    document.getElementById("temp").innerText=t+"°";
+db.ref("sera/temperature").on("value",snap=>{
+    t = Number(snap.val());
+    document.getElementById("temp").innerText = t + "°";
     check();
 });
 
 /* HUM */
-db.ref("sera/humidity").on("value",s=>{
-    h=Number(s.val());
-    document.getElementById("hum").innerText=h+"%";
+db.ref("sera/humidity").on("value",snap=>{
+    h = Number(snap.val());
+    document.getElementById("hum").innerText = h + "%";
     check();
 });
 
 /* PUMP */
-db.ref("sera/command").on("value",s=>{
-    document.getElementById("pumpStatus").innerText=
-    s.val()==="ON"?"🌊 AÇIK":"⛔ KAPALI";
+db.ref("sera/command").on("value",snap=>{
+    document.getElementById("pumpStatus").innerText =
+    snap.val() === "ON" ? "🌊 AÇIK" : "⛔ KAPALI";
 });
+
+/* CLOSE ALARM ON CLICK */
+document.getElementById("alarmScreen").onclick = function(){
+    this.style.display = "none";
+};
 
 </script>
 
