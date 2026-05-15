@@ -4,8 +4,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Akıllı Sera Panel</title>
 
+<title>Akıllı Sera Sistemi</title>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -17,8 +19,8 @@ body{
     font-family:Arial;
 
     background:
-    linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),
-    url("https://images.unsplash.com/photo-1461354464878-ad92f492a5a0")
+    linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
+    url("https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5")
     no-repeat center center fixed;
 
     background-size:cover;
@@ -27,57 +29,89 @@ body{
     justify-content:center;
     align-items:center;
     min-height:100vh;
+
     color:white;
 }
 
-.box{
-    width:380px;
-    padding:20px;
-    background:rgba(0,0,0,0.7);
-    border-radius:15px;
+/* PANEL */
+.panel{
+    width:390px;
+    background:rgba(0,0,0,0.70);
+    padding:25px;
+    border-radius:20px;
     text-align:center;
+    backdrop-filter:blur(8px);
 }
 
+/* INPUT */
 input{
     width:90%;
-    padding:10px;
-    margin:5px;
+    padding:12px;
+    margin:6px;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
 }
 
+/* BUTTON */
 button{
     width:95%;
-    padding:10px;
-    margin-top:8px;
+    padding:12px;
+    margin-top:10px;
     border:none;
-    border-radius:8px;
+    border-radius:10px;
+    font-size:16px;
     font-weight:bold;
     cursor:pointer;
 }
 
-.green{background:#22c55e;color:white;}
-.red{background:#ef4444;color:white;}
+.green{
+    background:#22c55e;
+    color:white;
+}
 
-.hidden{display:none;}
+.red{
+    background:#ef4444;
+    color:white;
+}
 
+.hidden{
+    display:none;
+}
+
+/* SENSOR BOX */
+.sensorBox{
+    margin-top:15px;
+    padding:15px;
+    border-radius:15px;
+    background:rgba(255,255,255,0.08);
+    font-size:22px;
+}
+
+/* ALERT */
 .alert{
-    margin-top:10px;
-    padding:10px;
-    border-radius:10px;
+    margin-top:15px;
+    padding:14px;
+    border-radius:12px;
+    font-size:18px;
+    font-weight:bold;
     background:rgba(34,197,94,0.2);
     border:2px solid #22c55e;
 }
 
-.alert.danger{
-    border-color:#ef4444;
-    animation:shake 0.4s infinite;
+/* PUMP */
+.pumpArea{
+    margin-top:20px;
 }
 
-@keyframes shake{
-    0%{transform:translateX(0);}
-    25%{transform:translateX(-3px);}
-    50%{transform:translateX(3px);}
-    75%{transform:translateX(-3px);}
-    100%{transform:translateX(0);}
+.pumpButtons{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
+
+.pumpButtons button{
+    flex:1;
 }
 
 /* 🔴 FLASH */
@@ -94,12 +128,12 @@ button{
 }
 
 .flash.active{
-    animation:flash 0.2s 3;
+    animation:flashAnim 0.3s 3;
 }
 
-@keyframes flash{
+@keyframes flashAnim{
     0%{opacity:0;}
-    50%{opacity:0.9;}
+    50%{opacity:0.85;}
     100%{opacity:0;}
 }
 
@@ -108,38 +142,64 @@ button{
 
 <body>
 
+<!-- 🔴 RED FLASH -->
 <div class="flash" id="flash"></div>
 
 <!-- LOGIN -->
-<div id="loginBox" class="box">
+<div id="loginPanel" class="panel">
 
-<h2>🌱 Giriş</h2>
+<h2>🌱 Akıllı Sera Giriş</h2>
 
 <input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Şifre">
+<input id="password" type="password" placeholder="Şifre">
 
-<button class="green" onclick="login()">Giriş</button>
-<button class="red" onclick="register()">Kayıt</button>
+<button class="green" onclick="login()">Giriş Yap</button>
+<button class="red" onclick="register()">Kayıt Ol</button>
 
 </div>
 
 <!-- DASHBOARD -->
-<div id="dash" class="box hidden">
+<div id="dashboard" class="panel hidden">
 
-<h2>🌱 Sera Panel</h2>
+<h2>🌿 Sera Kontrol Paneli</h2>
 
-<div>🌡️ <span id="temp">--</span></div>
-<div>💧 <span id="hum">--</span></div>
+<div class="sensorBox">
+🌡️ Sıcaklık:
+<span id="temp">--</span> °C
+</div>
 
-<div id="alertBox" class="alert">Sistem Normal</div>
+<div class="sensorBox">
+💧 Nem:
+<span id="hum">--</span> %
+</div>
 
-<button class="green" onclick="setPump('ON')">POMPA AÇ</button>
-<button class="red" onclick="setPump('OFF')">POMPA KAPAT</button>
+<div id="alertBox" class="alert">
+✅ Sistem Normal
+</div>
+
+<!-- POMPA -->
+<div class="pumpArea">
+
+<h3>🚿 Pompa Kontrolü</h3>
+
+<div class="pumpButtons">
+
+<button class="green" onclick="setPump('ON')">
+AÇ
+</button>
+
+<button class="red" onclick="setPump('OFF')">
+KAPAT
+</button>
+
+</div>
+
+</div>
 
 </div>
 
 <!-- 🔊 SOUND -->
-<audio id="sound">
+<audio id="alarmSound">
 <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
 </audio>
 
@@ -147,9 +207,11 @@ button{
 
 /* 🔥 FIREBASE */
 const firebaseConfig = {
+
     apiKey:"AIzaSyALpR1ATrKkhNZMeDCexRnHTgI56jc39b4",
     authDomain:"sera-61afd.firebaseapp.com",
     databaseURL:"https://sera-61afd-default-rtdb.europe-west1.firebasedatabase.app"
+
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -158,149 +220,251 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 /* STATE */
+let soundEnabled = false;
 let t = 0;
 let h = 0;
-let soundEnabled = false;
 
-/* 🔔 GOOGLE NOTIFICATION İZNİ */
-function askPermission(){
+/* 🔔 NOTIFICATION */
+function askNotificationPermission(){
 
     if("Notification" in window){
-        Notification.requestPermission();
+
+        Notification.requestPermission()
+        .then(permission=>{
+
+            console.log(permission);
+
+        });
+
     }
 }
 
-/* 🔊 SES AÇMA */
-document.addEventListener("click", () => {
+/* 🔊 SOUND ENABLE */
+document.addEventListener("click", ()=>{
 
-    const audio = document.getElementById("sound");
+    const audio = document.getElementById("alarmSound");
 
-    audio.play().then(() => {
+    audio.play()
+    .then(()=>{
+
         audio.pause();
         audio.currentTime = 0;
-        soundEnabled = true;
-        console.log("SOUND ENABLED");
-    }).catch(()=>{});
 
-    askPermission();
+        soundEnabled = true;
+
+    })
+    .catch(()=>{});
+
 });
 
-/* LOGIN */
-function login(){
-    auth.signInWithEmailAndPassword(email.value,pass.value)
-    .then(()=>{
-        loginBox.classList.add("hidden");
-        dash.classList.remove("hidden");
-    });
-}
-
-/* REGISTER */
-function register(){
-    auth.createUserWithEmailAndPassword(email.value,pass.value);
-}
-
-/* PUMP */
-function setPump(v){
-    db.ref("sera/command").set(v);
-}
-
-/* 🔊 ALARM */
+/* 🔊 PLAY ALARM */
 function playAlarm(){
 
     if(!soundEnabled) return;
 
-    const audio = document.getElementById("sound");
+    const audio = document.getElementById("alarmSound");
 
     audio.currentTime = 0;
+
     audio.play().catch(()=>{});
+
 }
 
 /* 🔴 FLASH */
-function flash(){
+function flashScreen(){
 
-    const f = document.getElementById("flash");
+    const flash = document.getElementById("flash");
 
-    f.classList.remove("active");
-    void f.offsetWidth;
-    f.classList.add("active");
+    flash.classList.remove("active");
+
+    void flash.offsetWidth;
+
+    flash.classList.add("active");
+
 }
 
-/* 📳 NOTIFICATION + ALARM */
-function triggerAlarm(msg){
+/* 🚨 ALARM */
+function triggerAlarm(message){
 
     playAlarm();
-    flash();
+
+    flashScreen();
 
     if(navigator.vibrate){
-        navigator.vibrate([300,100,300,100,600]);
+
+        navigator.vibrate([300,100,300,100,500]);
+
     }
 
     if(Notification.permission === "granted"){
-        new Notification("🌱 SERA ALARM",{
-            body:msg
+
+        new Notification("🌱 SERA ALARMI",{
+
+            body:message
+
         });
+
     }
+
 }
 
-/* CHECK SYSTEM */
-function check(){
+/* 🔥 CHECK VALUES */
+function checkValues(){
 
-    let msg="";
-    let danger=false;
+    let msg = "✅ Sistem Normal";
 
+    let danger = false;
+
+    /* SICAKLIK */
     if(t >= 25){
-        msg += "🔥 Sıcaklık yüksek ";
-        danger=true;
-        playAlarm();
+
+        msg = "🔥 Sıcaklık Yüksek!";
+        danger = true;
+
+        triggerAlarm(msg);
+
     }
 
+    /* NEM DÜŞÜK */
     if(h <= 35){
-        msg += "💧 Nem düşük ";
-        playAlarm();
+
+        msg = "💧 Nem Çok Düşük!";
+        danger = true;
+
+        triggerAlarm(msg);
+
     }
 
+    /* NEM YÜKSEK */
     if(h >= 80){
-        msg += "🌫️ Nem yüksek ";
-        danger=true;
-        playAlarm();
+
+        msg = "🌫️ Nem Çok Yüksek!";
+        danger = true;
+
+        triggerAlarm(msg);
+
     }
 
+    /* İKİSİ BİRDEN */
     if(t >= 30 && h >= 85){
-        triggerAlarm("KRİTİK DURUM!");
+
+        msg = "🚨 KRİTİK DURUM!";
+        danger = true;
+
+        triggerAlarm(msg);
+
     }
 
-    let box = document.getElementById("alertBox");
+    const box = document.getElementById("alertBox");
 
-    if(msg === ""){
-        box.className = "alert";
-        box.innerHTML = "Sistem Normal";
-        return;
-    }
-
-    box.className = danger ? "alert danger" : "alert";
     box.innerHTML = msg;
+
+    if(danger){
+
+        box.style.borderColor = "#ef4444";
+        box.style.background = "rgba(239,68,68,0.25)";
+
+    }else{
+
+        box.style.borderColor = "#22c55e";
+        box.style.background = "rgba(34,197,94,0.2)";
+
+    }
+
 }
 
-/* SENSOR DATA */
+/* 🔐 REGISTER */
+function register(){
+
+    auth.createUserWithEmailAndPassword(
+
+        email.value,
+        password.value
+
+    )
+
+    .then(()=>{
+
+        alert("Kayıt başarılı");
+
+    })
+
+    .catch(e=>{
+
+        alert(e.message);
+
+    });
+
+}
+
+/* 🔐 LOGIN */
+function login(){
+
+    auth.signInWithEmailAndPassword(
+
+        email.value,
+        password.value
+
+    )
+
+    .then(()=>{
+
+        loginPanel.classList.add("hidden");
+
+        dashboard.classList.remove("hidden");
+
+        askNotificationPermission();
+
+    })
+
+    .catch(e=>{
+
+        alert(e.message);
+
+    });
+
+}
+
+/* 🚿 PUMP */
+function setPump(state){
+
+    db.ref("sera/command").set(state);
+
+}
+
+/* 🌡️ SICAKLIK */
 db.ref("sera/temperature").on("value",snap=>{
+
     t = Number(snap.val());
-    temp.innerText = t + "°";
-    check();
+
+    document.getElementById("temp").innerText = t;
+
+    checkValues();
+
 });
 
+/* 💧 NEM */
 db.ref("sera/humidity").on("value",snap=>{
+
     h = Number(snap.val());
-    hum.innerText = h + "%";
-    check();
+
+    document.getElementById("hum").innerText = h;
+
+    checkValues();
+
 });
 
-/* AUTH */
+/* AUTO LOGIN */
 auth.onAuthStateChanged(user=>{
+
     if(user){
-        loginBox.classList.add("hidden");
-        dash.classList.remove("hidden");
-        askPermission();
+
+        loginPanel.classList.add("hidden");
+
+        dashboard.classList.remove("hidden");
+
     }
+
 });
 
 </script>
