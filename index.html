@@ -14,55 +14,112 @@
 
 <style>
 
-body{
+*{
     margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
     font-family:Arial;
+    overflow:hidden;
+}
+
+/* LOGIN SCREEN */
+#authScreen{
+
+    position:fixed;
+    width:100%;
+    height:100%;
 
     background:
     linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
-    url("https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5")
-    no-repeat center center fixed;
+    url("https://images.unsplash.com/photo-1501004318641-b39e6451bec6")
+    no-repeat center center;
 
     background-size:cover;
 
     display:flex;
     justify-content:center;
     align-items:center;
-    min-height:100vh;
 
-    color:white;
 }
 
-/* PANEL */
-.panel{
+/* DASHBOARD */
+#dashboard{
+
+    position:fixed;
+    width:100%;
+    height:100%;
+
+    background:
+    linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.65)),
+    url("https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5")
+    no-repeat center center;
+
+    background-size:cover;
+
+    display:none;
+    justify-content:center;
+    align-items:center;
+
+}
+
+/* CARD */
+.card{
+
     width:390px;
-    background:rgba(0,0,0,0.70);
+
+    background:rgba(0,0,0,0.7);
+
     padding:25px;
+
     border-radius:20px;
+
     text-align:center;
+
+    color:white;
+
     backdrop-filter:blur(8px);
+
 }
 
 /* INPUT */
 input{
-    width:90%;
+
+    width:100%;
+
     padding:12px;
-    margin:6px;
+
+    margin-top:10px;
+
     border:none;
+
     border-radius:10px;
+
     font-size:15px;
+
 }
 
 /* BUTTON */
 button{
-    width:95%;
+
+    width:100%;
+
     padding:12px;
-    margin-top:10px;
+
+    margin-top:12px;
+
     border:none;
+
     border-radius:10px;
+
     font-size:16px;
+
     font-weight:bold;
+
     cursor:pointer;
+
 }
 
 .green{
@@ -75,66 +132,129 @@ button{
     color:white;
 }
 
-.hidden{
-    display:none;
+/* LINK */
+.link{
+
+    margin-top:15px;
+
+    color:#93c5fd;
+
+    cursor:pointer;
+
 }
 
-/* SENSOR BOX */
-.sensorBox{
+/* SENSOR */
+.sensor{
+
     margin-top:15px;
+
     padding:15px;
+
     border-radius:15px;
+
     background:rgba(255,255,255,0.08);
-    font-size:22px;
+
+    font-size:24px;
+
 }
 
 /* ALERT */
 .alert{
+
     margin-top:15px;
-    padding:14px;
-    border-radius:12px;
-    font-size:18px;
+
+    padding:15px;
+
+    border-radius:15px;
+
+    font-size:20px;
+
     font-weight:bold;
+
     background:rgba(34,197,94,0.2);
+
     border:2px solid #22c55e;
+
 }
 
 /* PUMP */
-.pumpArea{
-    margin-top:20px;
-}
-
 .pumpButtons{
-    display:flex;
-    gap:10px;
-    margin-top:10px;
-}
 
-.pumpButtons button{
-    flex:1;
+    display:flex;
+
+    gap:10px;
+
+    margin-top:15px;
+
 }
 
 /* 🔴 FLASH */
 .flash{
+
     position:fixed;
+
     top:0;
     left:0;
+
     width:100%;
     height:100%;
+
     background:red;
+
     opacity:0;
+
     pointer-events:none;
+
     z-index:9999;
+
 }
 
 .flash.active{
-    animation:flashAnim 0.3s 3;
+
+    animation:flashAnim 0.25s 3;
+
 }
 
 @keyframes flashAnim{
+
     0%{opacity:0;}
-    50%{opacity:0.85;}
+    50%{opacity:0.9;}
     100%{opacity:0;}
+
+}
+
+/* 🔔 TOP NOTIFICATION */
+#topNotification{
+
+    position:fixed;
+
+    top:-100px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    background:#ef4444;
+
+    color:white;
+
+    padding:15px 30px;
+
+    border-radius:15px;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    z-index:10000;
+
+    transition:0.4s;
+
+}
+
+#topNotification.show{
+
+    top:20px;
+
 }
 
 </style>
@@ -142,33 +262,76 @@ button{
 
 <body>
 
-<!-- 🔴 RED FLASH -->
+<!-- 🔴 FLASH -->
 <div class="flash" id="flash"></div>
 
+<!-- 🔔 TOP NOTIFICATION -->
+<div id="topNotification">
+ALARM
+</div>
+
+<!-- AUTH -->
+<div id="authScreen">
+
+<div class="card">
+
 <!-- LOGIN -->
-<div id="loginPanel" class="panel">
+<div id="loginBox">
 
-<h2>🌱 Akıllı Sera Giriş</h2>
+<h2>🌱 Giriş Yap</h2>
 
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Şifre">
+<input id="loginEmail" placeholder="Email">
 
-<button class="green" onclick="login()">Giriş Yap</button>
-<button class="red" onclick="register()">Kayıt Ol</button>
+<input id="loginPass" type="password" placeholder="Şifre">
+
+<button class="green" onclick="login()">
+Giriş Yap
+</button>
+
+<div class="link" onclick="showRegister()">
+Hesabınız yok mu? Kayıt Olun
+</div>
+
+</div>
+
+<!-- REGISTER -->
+<div id="registerBox" style="display:none;">
+
+<h2>📝 Kayıt Ol</h2>
+
+<input id="regEmail" placeholder="Email">
+
+<input id="regPass" type="password" placeholder="Şifre">
+
+<input id="regPass2" type="password" placeholder="Şifre Tekrar">
+
+<button class="red" onclick="register()">
+Kayıt Ol
+</button>
+
+<div class="link" onclick="showLogin()">
+Zaten hesabınız var mı? Giriş Yap
+</div>
+
+</div>
+
+</div>
 
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="panel hidden">
+<div id="dashboard">
 
-<h2>🌿 Sera Kontrol Paneli</h2>
+<div class="card">
 
-<div class="sensorBox">
+<h2>🌿 Akıllı Sera</h2>
+
+<div class="sensor">
 🌡️ Sıcaklık:
 <span id="temp">--</span> °C
 </div>
 
-<div class="sensorBox">
+<div class="sensor">
 💧 Nem:
 <span id="hum">--</span> %
 </div>
@@ -177,18 +340,19 @@ button{
 ✅ Sistem Normal
 </div>
 
-<!-- POMPA -->
-<div class="pumpArea">
-
-<h3>🚿 Pompa Kontrolü</h3>
+<h3 style="margin-top:20px;">
+🚿 Pompa Kontrolü
+</h3>
 
 <div class="pumpButtons">
 
-<button class="green" onclick="setPump('ON')">
+<button class="green"
+onclick="setPump('ON')">
 AÇ
 </button>
 
-<button class="red" onclick="setPump('OFF')">
+<button class="red"
+onclick="setPump('OFF')">
 KAPAT
 </button>
 
@@ -200,12 +364,14 @@ KAPAT
 
 <!-- 🔊 SOUND -->
 <audio id="alarmSound">
+
 <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
+
 </audio>
 
 <script>
 
-/* 🔥 FIREBASE */
+/* FIREBASE */
 const firebaseConfig = {
 
     apiKey:"AIzaSyALpR1ATrKkhNZMeDCexRnHTgI56jc39b4",
@@ -221,48 +387,50 @@ const db = firebase.database();
 
 /* STATE */
 let soundEnabled = false;
+
 let t = 0;
 let h = 0;
 
-/* 🔔 NOTIFICATION */
-function askNotificationPermission(){
-
-    if("Notification" in window){
-
-        Notification.requestPermission()
-        .then(permission=>{
-
-            console.log(permission);
-
-        });
-
-    }
-}
-
-/* 🔊 SOUND ENABLE */
+/* 🔊 ENABLE SOUND */
 document.addEventListener("click", ()=>{
 
-    const audio = document.getElementById("alarmSound");
+    const audio =
+    document.getElementById("alarmSound");
 
     audio.play()
+
     .then(()=>{
 
         audio.pause();
+
         audio.currentTime = 0;
 
         soundEnabled = true;
 
     })
+
     .catch(()=>{});
 
 });
 
-/* 🔊 PLAY ALARM */
+/* 🔔 BROWSER PERMISSION */
+function askNotificationPermission(){
+
+    if("Notification" in window){
+
+        Notification.requestPermission();
+
+    }
+
+}
+
+/* 🔊 PLAY SOUND */
 function playAlarm(){
 
     if(!soundEnabled) return;
 
-    const audio = document.getElementById("alarmSound");
+    const audio =
+    document.getElementById("alarmSound");
 
     audio.currentTime = 0;
 
@@ -273,7 +441,8 @@ function playAlarm(){
 /* 🔴 FLASH */
 function flashScreen(){
 
-    const flash = document.getElementById("flash");
+    const flash =
+    document.getElementById("flash");
 
     flash.classList.remove("active");
 
@@ -283,109 +452,177 @@ function flashScreen(){
 
 }
 
-/* 🚨 ALARM */
+/* 🔔 TOP MESSAGE */
+function showTopNotification(text){
+
+    const n =
+    document.getElementById("topNotification");
+
+    n.innerText = text;
+
+    n.classList.add("show");
+
+    setTimeout(()=>{
+
+        n.classList.remove("show");
+
+    },3000);
+
+}
+
+/* 🚨 TRIGGER */
 function triggerAlarm(message){
 
     playAlarm();
 
     flashScreen();
 
+    showTopNotification(message);
+
     if(navigator.vibrate){
 
-        navigator.vibrate([300,100,300,100,500]);
+        navigator.vibrate([
+            300,100,
+            300,100,
+            500
+        ]);
 
     }
 
     if(Notification.permission === "granted"){
 
-        new Notification("🌱 SERA ALARMI",{
-
-            body:message
-
-        });
+        new Notification(
+            "🌱 SERA ALARMI",
+            {
+                body:message
+            }
+        );
 
     }
 
 }
 
-/* 🔥 CHECK VALUES */
+/* CHECK VALUES */
 function checkValues(){
 
     let msg = "✅ Sistem Normal";
 
     let danger = false;
 
-    /* SICAKLIK */
     if(t >= 25){
 
         msg = "🔥 Sıcaklık Yüksek!";
+
         danger = true;
 
         triggerAlarm(msg);
 
     }
 
-    /* NEM DÜŞÜK */
     if(h <= 35){
 
         msg = "💧 Nem Çok Düşük!";
+
         danger = true;
 
         triggerAlarm(msg);
 
     }
 
-    /* NEM YÜKSEK */
     if(h >= 80){
 
         msg = "🌫️ Nem Çok Yüksek!";
+
         danger = true;
 
         triggerAlarm(msg);
 
     }
 
-    /* İKİSİ BİRDEN */
     if(t >= 30 && h >= 85){
 
         msg = "🚨 KRİTİK DURUM!";
+
         danger = true;
 
         triggerAlarm(msg);
 
     }
 
-    const box = document.getElementById("alertBox");
+    const box =
+    document.getElementById("alertBox");
 
     box.innerHTML = msg;
 
     if(danger){
 
-        box.style.borderColor = "#ef4444";
-        box.style.background = "rgba(239,68,68,0.25)";
+        box.style.borderColor =
+        "#ef4444";
 
-    }else{
+        box.style.background =
+        "rgba(239,68,68,0.25)";
 
-        box.style.borderColor = "#22c55e";
-        box.style.background = "rgba(34,197,94,0.2)";
+    }
+
+    else{
+
+        box.style.borderColor =
+        "#22c55e";
+
+        box.style.background =
+        "rgba(34,197,94,0.2)";
 
     }
 
 }
 
-/* 🔐 REGISTER */
+/* LOGIN SCREEN */
+function showRegister(){
+
+    loginBox.style.display = "none";
+
+    registerBox.style.display = "block";
+
+}
+
+function showLogin(){
+
+    registerBox.style.display = "none";
+
+    loginBox.style.display = "block";
+
+}
+
+/* REGISTER */
 function register(){
 
+    const email =
+    document.getElementById("regEmail").value;
+
+    const pass =
+    document.getElementById("regPass").value;
+
+    const pass2 =
+    document.getElementById("regPass2").value;
+
+    if(pass !== pass2){
+
+        alert("Şifreler aynı değil!");
+
+        return;
+
+    }
+
     auth.createUserWithEmailAndPassword(
-
-        email.value,
-        password.value
-
+        email,
+        pass
     )
 
     .then(()=>{
 
-        alert("Kayıt başarılı");
+        alert("Kayıt başarılı!");
+
+        showLogin();
 
     })
 
@@ -397,21 +634,25 @@ function register(){
 
 }
 
-/* 🔐 LOGIN */
+/* LOGIN */
 function login(){
 
+    const email =
+    document.getElementById("loginEmail").value;
+
+    const pass =
+    document.getElementById("loginPass").value;
+
     auth.signInWithEmailAndPassword(
-
-        email.value,
-        password.value
-
+        email,
+        pass
     )
 
     .then(()=>{
 
-        loginPanel.classList.add("hidden");
+        authScreen.style.display = "none";
 
-        dashboard.classList.remove("hidden");
+        dashboard.style.display = "flex";
 
         askNotificationPermission();
 
@@ -425,30 +666,31 @@ function login(){
 
 }
 
-/* 🚿 PUMP */
+/* PUMP */
 function setPump(state){
 
     db.ref("sera/command").set(state);
 
 }
 
-/* 🌡️ SICAKLIK */
-db.ref("sera/temperature").on("value",snap=>{
+/* SENSOR DATA */
+db.ref("sera/temperature")
+.on("value",snap=>{
 
     t = Number(snap.val());
 
-    document.getElementById("temp").innerText = t;
+    temp.innerText = t;
 
     checkValues();
 
 });
 
-/* 💧 NEM */
-db.ref("sera/humidity").on("value",snap=>{
+db.ref("sera/humidity")
+.on("value",snap=>{
 
     h = Number(snap.val());
 
-    document.getElementById("hum").innerText = h;
+    hum.innerText = h;
 
     checkValues();
 
@@ -459,9 +701,9 @@ auth.onAuthStateChanged(user=>{
 
     if(user){
 
-        loginPanel.classList.add("hidden");
+        authScreen.style.display = "none";
 
-        dashboard.classList.remove("hidden");
+        dashboard.style.display = "flex";
 
     }
 
